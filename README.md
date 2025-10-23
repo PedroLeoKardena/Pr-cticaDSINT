@@ -1,1 +1,1 @@
-"# Proyecto DSINT Electrocardiograma" 
+# ProyectoDSINT 📊
