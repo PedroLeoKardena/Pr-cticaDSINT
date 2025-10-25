@@ -1,12 +1,12 @@
 package launcherECG;
 
 
-import ventanas.VentanaFicheros;
+import ventanas.Inicio;
 
 public class Launcher {
 	public static void main(String[] args) {
 		
-		new VentanaFicheros();
+		new Inicio();
 
 	}
 }
