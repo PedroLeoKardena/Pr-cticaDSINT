@@ -1,0 +1,200 @@
+//created on: 25 oct 2025
+package rule1
+
+//list any import classes here.
+import java.util.List;
+import java.util.ArrayList;
+import dominioECG.*;
+
+//declare any global variables here
+
+
+
+
+rule "Print y Crear Registros Persona"
+	no-loop true
+    when
+        $p: Persona();
+    then
+    	java.util.List<RegistroECG> registros = $p.getRegistroECG();
+        for (RegistroECG reg : registros) {
+	        System.out.println("Registro ID: " + reg.getIdRegistro());
+	        System.out.println("Insertando registro clase: " + reg.getClass().getName());
+	        insert(reg);
+    	}
+    	$p.setRegistrosProcesados(true);
+        update($p);
+end
+
+rule "Crear intervalos RR Persona"
+    when
+        $r: dominioECG.RegistroECG();
+    then
+	    System.out.println("Creación intervalos RR del registro con ID: " + $r.getIdRegistro());
+	    List<Ciclo> ciclos = $r.getCiclosRegistro();
+
+	    for (int i = 0; i < ciclos.size() - 1; i++) {
+	        OndaR r1 = ciclos.get(i).getWaveR();
+	        OndaR r2 = ciclos.get(i + 1).getWaveR();
+	
+	        Intervalo intervaloRR = new Intervalo(r1.getStart_time(), r2.getStart_time(), TipoIntervalo.RR);
+	        insert(intervaloRR);
+	    }
+end
+
+rule "Crear intervalos PP Persona"
+    when
+        $r: dominioECG.RegistroECG();
+    then
+	    System.out.println("Creación intervalos PP del registro con ID: " + $r.getIdRegistro());
+	    List<Ciclo> ciclos = $r.getCiclosRegistro();
+
+	    for (int i = 0; i < ciclos.size() - 1; i++) {
+	        OndaP p1 = ciclos.get(i).getWaveP();
+	        OndaP p2 = ciclos.get(i + 1).getWaveP();
+	
+	        Intervalo intervaloPP = new Intervalo(p1.getStart_time(), p2.getStart_time(), TipoIntervalo.PP);
+	        insert(intervaloPP);
+	    }
+end
+
+rule "Crear intervalos PR Persona"
+    when
+        $r: dominioECG.RegistroECG();
+    then
+	    System.out.println("Creación intervalos PR del registro con ID: " + $r.getIdRegistro());
+	    List<Ciclo> ciclos = $r.getCiclosRegistro();
+
+	    for (Ciclo c : ciclos) {
+	        OndaP p = c.getWaveP();
+        	OndaR r = c.getWaveR();
+
+        	Intervalo intervaloPR = new Intervalo(p.getStart_time(), r.getStart_time(), TipoIntervalo.PR);
+        	insert(intervaloPR);
+	    }
+end
+
+rule "Crear intervalos QT Persona"
+    when
+        $r: dominioECG.RegistroECG();
+    then
+	    System.out.println("Creación intervalos QT del registro con ID: " + $r.getIdRegistro());
+	    List<Ciclo> ciclos = $r.getCiclosRegistro();
+
+	    for (Ciclo c : ciclos) {
+	        OndaQ q = c.getWaveQ();
+        	OndaT t = c.getWaveT();
+			if (t != null){
+        		Intervalo intervaloQT = new Intervalo(q.getStart_time(), t.getEnd_time(), TipoIntervalo.QT);
+        		insert(intervaloQT);
+        	}
+        	
+	    }
+end
+
+rule "Crear intervalos ST Persona"
+    when
+        $r: dominioECG.RegistroECG();
+    then
+	    System.out.println("Creación intervalos ST del registro con ID: " + $r.getIdRegistro());
+	    List<Ciclo> ciclos = $r.getCiclosRegistro();
+
+	    for (Ciclo c : ciclos) {
+	        OndaS s = c.getWaveS();
+        	OndaT t = c.getWaveT();
+			if (t != null){
+	        	Intervalo intervaloST = new Intervalo(s.getEnd_time(), t.getStart_time(), TipoIntervalo.ST);
+	        	insert(intervaloST);
+	        }
+	    }
+end
+
+rule "Crear intervalos TP Persona"
+    when
+        $r: dominioECG.RegistroECG();
+    then
+	    System.out.println("Creación intervalos TP del registro con ID: " + $r.getIdRegistro());
+	    List<Ciclo> ciclos = $r.getCiclosRegistro();
+
+	    for (int i = 0; i < ciclos.size() - 1; i++) {
+	        OndaT t = ciclos.get(i).getWaveT();
+	        OndaP p = ciclos.get(i + 1).getWaveP();
+			if (t != null){
+		        Intervalo intervaloTP = new Intervalo(t.getStart_time(), p.getStart_time(), TipoIntervalo.TP);
+		        insert(intervaloTP);
+		    }
+	    }
+end
+
+rule "Crear complejo QRS"
+	when
+	    $reg: dominioECG.RegistroECG()
+	then
+		System.out.println("Creación complejos QRS del registro con ID: " + $reg.getIdRegistro());
+	    List<Ciclo> ciclos = $reg.getCiclosRegistro();
+	
+	    for (Ciclo c : ciclos) {
+	        List<Onda> ondas = new ArrayList<>();
+	        ondas.add(c.getWaveQ());
+	        ondas.add(c.getWaveR());
+	        ondas.add(c.getWaveS());
+	
+	        int tiempoInicio = c.getWaveQ().getStart_time();
+	        int tiempoFin = c.getWaveS().getEnd_time();
+	
+	        Complejo qrs = new Complejo(ondas, tiempoInicio, tiempoFin);
+	        insert(qrs);
+	    }
+end
+
+rule "Calcular ritmo cardiaco"
+	when
+	    $reg: dominioECG.RegistroECG()
+	    $rrs: List() from collect ( dominioECG.Intervalo( tipoIntervalo == dominioECG.TipoIntervalo.RR ) )
+	then
+	    double sumaRR = 0.0;
+	    for (Object obj : $rrs) {
+	        Intervalo i = (Intervalo) obj;
+	        double duracionMs = i.getTiempoFin() - i.getTiempoInicio();
+	        sumaRR += duracionMs;
+	    }
+	
+	    if (!$rrs.isEmpty()) {
+	        double promedioRRseg = (sumaRR / $rrs.size()) / 1000.0; // convertir ms a s
+	        double hr = 60.0 / promedioRRseg;
+	
+	        System.out.println("Registro ID: " + $reg.getIdRegistro());
+	        System.out.println("Numero de ciclos: " + $reg.getCiclosRegistro().size());
+	        System.out.println("Ritmo cardiaco estimado: " + hr + " bpm");
+	
+	        RitmoCardiaco rc = new RitmoCardiaco(hr, $reg);
+	        insert(rc);
+	    }
+end
+
+rule "Detectar taquicardia"
+	when
+	    $rc: dominioECG.RitmoCardiaco( valor > 100 )
+	then
+	    System.out.println("Taquicardia detectada en el registro " + $rc.getRegistro().getIdRegistro() + 
+	                       " (HR = " + $rc.getValor() + " bpm)");
+		String desc = new String("Taquicardia detectada en el registro " + $rc.getRegistro().getIdRegistro() + 
+	                       " (HR = " + $rc.getValor() + " bpm)");
+		Taquicardia taquicardia = new Taquicardia(desc, "Taquicardia");
+		taquicardia.setRegistroAsociado($rc.getRegistro());
+		insert(taquicardia);
+		
+end
+
+rule "Detectar bradicardia"
+	when
+	    $rc: dominioECG.RitmoCardiaco( valor < 60 )
+	then
+	    System.out.println("Bradicardia detectada en el registro " + $rc.getRegistro().getIdRegistro() + 
+	                       " (HR = " + $rc.getValor() + " bpm)");
+		String desc = new String("Bradicardia detectada en el registro " + $rc.getRegistro().getIdRegistro() + 
+	                       " (HR = " + $rc.getValor() + " bpm)");
+		Bradicardia bradicardia = new Bradicardia(desc, "Bradicardia");
+		bradicardia.setRegistroAsociado($rc.getRegistro());
+		insert(bradicardia);         
+end

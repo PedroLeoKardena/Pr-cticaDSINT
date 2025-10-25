@@ -28,6 +28,11 @@ public abstract class Onda {
 	public int getDuration() {
 		return end_time - start_time;
 	}
+
+	@Override
+	public String toString() {
+		return "Onda [start_time=" + start_time + ", end_time=" + end_time + ", peak_amplitude=" + peak_amplitude + "]";
+	}
 	
 	
 	

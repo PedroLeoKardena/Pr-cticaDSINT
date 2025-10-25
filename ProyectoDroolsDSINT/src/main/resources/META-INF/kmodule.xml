@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kmodule xmlns="http://jboss.org/kie/6.0.0/kmodule">
-    <kbase name="rule1" packages="rule1">
+    <kbase name="ECGBase" packages="rule1">
         <ksession name="ECGSesionStateful1" type = "stateful"/>
     </kbase>	
 </kmodule>

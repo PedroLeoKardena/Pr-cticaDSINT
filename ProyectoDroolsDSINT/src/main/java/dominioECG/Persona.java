@@ -9,6 +9,7 @@ public class Persona {
 	private String nombre;
 	private String sexo;
 	private List<RegistroECG> registroECG;
+	private boolean registrosProcesados = false;
 	
 	public Persona(int edad, String idPersona, String nombre, String sexo) {
 		this.edad = edad;
@@ -38,7 +39,15 @@ public class Persona {
 		return new ArrayList<RegistroECG>(registroECG);
 	}
 	
-	public void addDiagnostico(RegistroECG registroECG) {
+	public boolean isRegistrosProcesados() { 
+        return registrosProcesados;
+    }
+	
+	public void setRegistrosProcesados(boolean b) {
+		this.registrosProcesados = b;
+	}
+	
+	public void addRegistroECG(RegistroECG registroECG) {
 		this.registroECG.add(registroECG);
 	}
 	

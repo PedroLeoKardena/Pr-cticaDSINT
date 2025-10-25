@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Ciclo {
-	
+
 	private int cycle_number;
 	private OndaP waveP;
 	private OndaQ waveQ;
@@ -73,5 +73,12 @@ public class Ciclo {
 	
 	public int getTiempoFin() {
 		return this.waveT.getEnd_time();
+	}
+	
+	@Override
+	public String toString() {
+		return "Ciclo [cycle_number=" + cycle_number + ", waveP=" + waveP + ", waveQ=" + waveQ + ", waveR=" + waveR
+				+ ", waveS=" + waveS + ", waveT=" + waveT + ", complejos=" + complejos + ", intervalos=" + intervalos
+				+ "]";
 	}
 }

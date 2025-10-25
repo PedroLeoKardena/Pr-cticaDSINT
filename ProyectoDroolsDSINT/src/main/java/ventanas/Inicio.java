@@ -110,7 +110,7 @@ public class Inicio {
         constraintsCampoEdad.insets = new Insets(10, 10, 10, 10);
         contentPane.add(campoEdad, constraintsCampoEdad);
         
-        JLabel labelSexo = new JLabel("Sexo (Masculino o Femenino)");
+        JLabel labelSexo = new JLabel("Sexo (M o F)");
         GridBagConstraints constraintsLabelSexo = new GridBagConstraints();
         constraintsLabelSexo.gridx = 2;  
         constraintsLabelSexo.gridy = 2; 
@@ -185,8 +185,8 @@ public class Inicio {
 				}else {
 					String sexo = campoSexo.getText();
 					
-					if (!sexo.equals("Masculino") && !sexo.equals("Femenino")){
-						JOptionPane.showMessageDialog(frameRegister, "No has introducido las opciones \"Masculino\" o \"Femenino\".\n",
+					if (!sexo.equals("M") && !sexo.equals("F")){
+						JOptionPane.showMessageDialog(frameRegister, "No has introducido las opciones \"M\" o \"F\".\n",
 								"Registro", JOptionPane.WARNING_MESSAGE);
 					}else {
 						JOptionPane.showMessageDialog(frameRegister, "Rellene todos los campos de forma correcta.\n",
@@ -226,7 +226,7 @@ public class Inicio {
 			
 			salida = false;
 		} 
-		if (!sexo.equals("Masculino") && !sexo.equals("Femenino")) {
+		if (!sexo.equals("M") && !sexo.equals("F")) {
 
 			salida = false;
 		}
