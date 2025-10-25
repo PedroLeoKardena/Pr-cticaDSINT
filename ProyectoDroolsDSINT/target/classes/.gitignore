@@ -1,10 +1,4 @@
-/rule1/
-/META-INF/
 /com/
-/RegistroECG.class
 /dominioECG/
-/utilsECG/
-/LauncherECG/
-/launcherECG.class
 /launcherECG/
-/ventanas/
+/utilsECG/
