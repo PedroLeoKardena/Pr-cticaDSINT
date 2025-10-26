@@ -2,8 +2,8 @@ package dominioECG;
 
 public class Taquicardia extends Diagnostico{
 
-	public Taquicardia(String descripción, String nombreDiagnostico) {
-		super(descripción, nombreDiagnostico);
+	public Taquicardia(String descripcion, String nombreDiagnostico) {
+		super(descripcion, nombreDiagnostico);
 	}
 
 }

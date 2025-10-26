@@ -2,8 +2,8 @@ package dominioECG;
 
 public class ContraccionVentricularPrematura extends Diagnostico {
 
-	public ContraccionVentricularPrematura(String descripción, String nombreDiagnostico) {
-		super(descripción, nombreDiagnostico);
+	public ContraccionVentricularPrematura(String descripcion, String nombreDiagnostico) {
+		super(descripcion, nombreDiagnostico);
 	}
 
 }
