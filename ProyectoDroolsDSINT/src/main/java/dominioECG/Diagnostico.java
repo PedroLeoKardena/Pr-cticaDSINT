@@ -1,17 +1,17 @@
 package dominioECG;
 
 public abstract class Diagnostico {
-	private String descripción;
+	private String descripcion;
 	private String nombreDiagnostico;
 	private RegistroECG registroAsociado;
 	
-	public Diagnostico(String descripción, String nombreDiagnostico) {
-		this.descripción = descripción;
+	public Diagnostico(String descripcion, String nombreDiagnostico) {
+		this.descripcion = descripcion;
 		this.nombreDiagnostico = nombreDiagnostico;
 	}
 
-	public String getDescripción() {
-		return descripción;
+	public String getDescripcion() {
+		return descripcion;
 	}
 	
 	public String getNombreDiagnostico() {

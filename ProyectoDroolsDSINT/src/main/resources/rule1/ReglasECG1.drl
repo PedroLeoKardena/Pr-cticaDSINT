@@ -30,7 +30,7 @@ rule "Crear intervalos RR Persona"
     when
         $r: dominioECG.RegistroECG();
     then
-	    System.out.println("Creación intervalos RR del registro con ID: " + $r.getIdRegistro());
+	    System.out.println("Creaciï¿½n intervalos RR del registro con ID: " + $r.getIdRegistro());
 	    List<Ciclo> ciclos = $r.getCiclosRegistro();
 
 	    for (int i = 0; i < ciclos.size() - 1; i++) {
@@ -46,7 +46,7 @@ rule "Crear intervalos PP Persona"
     when
         $r: dominioECG.RegistroECG();
     then
-	    System.out.println("Creación intervalos PP del registro con ID: " + $r.getIdRegistro());
+	    System.out.println("Creaciï¿½n intervalos PP del registro con ID: " + $r.getIdRegistro());
 	    List<Ciclo> ciclos = $r.getCiclosRegistro();
 
 	    for (int i = 0; i < ciclos.size() - 1; i++) {
@@ -62,7 +62,7 @@ rule "Crear intervalos PR Persona"
     when
         $r: dominioECG.RegistroECG();
     then
-	    System.out.println("Creación intervalos PR del registro con ID: " + $r.getIdRegistro());
+	    System.out.println("Creaciï¿½n intervalos PR del registro con ID: " + $r.getIdRegistro());
 	    List<Ciclo> ciclos = $r.getCiclosRegistro();
 
 	    for (Ciclo c : ciclos) {
@@ -78,7 +78,7 @@ rule "Crear intervalos QT Persona"
     when
         $r: dominioECG.RegistroECG();
     then
-	    System.out.println("Creación intervalos QT del registro con ID: " + $r.getIdRegistro());
+	    System.out.println("Creaciï¿½n intervalos QT del registro con ID: " + $r.getIdRegistro());
 	    List<Ciclo> ciclos = $r.getCiclosRegistro();
 
 	    for (Ciclo c : ciclos) {
@@ -96,7 +96,7 @@ rule "Crear intervalos ST Persona"
     when
         $r: dominioECG.RegistroECG();
     then
-	    System.out.println("Creación intervalos ST del registro con ID: " + $r.getIdRegistro());
+	    System.out.println("Creaciï¿½n intervalos ST del registro con ID: " + $r.getIdRegistro());
 	    List<Ciclo> ciclos = $r.getCiclosRegistro();
 
 	    for (Ciclo c : ciclos) {
@@ -113,7 +113,7 @@ rule "Crear intervalos TP Persona"
     when
         $r: dominioECG.RegistroECG();
     then
-	    System.out.println("Creación intervalos TP del registro con ID: " + $r.getIdRegistro());
+	    System.out.println("Creaciï¿½n intervalos TP del registro con ID: " + $r.getIdRegistro());
 	    List<Ciclo> ciclos = $r.getCiclosRegistro();
 
 	    for (int i = 0; i < ciclos.size() - 1; i++) {
@@ -130,7 +130,7 @@ rule "Crear complejo QRS"
 	when
 	    $reg: dominioECG.RegistroECG()
 	then
-		System.out.println("Creación complejos QRS del registro con ID: " + $reg.getIdRegistro());
+		System.out.println("Creaciï¿½n complejos QRS del registro con ID: " + $reg.getIdRegistro());
 	    List<Ciclo> ciclos = $reg.getCiclosRegistro();
 	
 	    for (Ciclo c : ciclos) {

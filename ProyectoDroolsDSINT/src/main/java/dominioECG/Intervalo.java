@@ -23,7 +23,7 @@ public class Intervalo {
 		return tipoIntervalo;
 	}
 	
-	public int getDuración() {
+	public int getDuracion() {
 		return tiempoFin-tiempoInicio;
 	}
 }
