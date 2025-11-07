@@ -11,22 +11,46 @@ public class Ciclo {
 	private OndaR waveR;
 	private OndaS waveS;
 	private OndaT waveT;
+	private RegistroECG registroPertenece;
 	
 	//Un ciclo tiene varios complejos e intervalos.
 	private List<Complejo> complejos;
 	private List<Intervalo> intervalos;
 	
-	public Ciclo(int cycle_number, OndaP waveP, OndaQ waveQ, OndaR waveR, OndaS waveS, OndaT waveT) {
-		this.cycle_number = cycle_number;
-		this.waveP = waveP;
-		this.waveQ = waveQ;
-		this.waveR = waveR;
-		this.waveS = waveS;
-		this.waveT = waveT;
+	public Ciclo() {
+		this.waveP = null;
+		this.waveQ = null;
+		this.waveR = null;
+		this.waveS = null;
+		this.waveT = null;
 		complejos = new ArrayList<Complejo>();
 		intervalos = new ArrayList<Intervalo>();
 	}
 	
+	public void setCycle_number(int cycle_number) {
+		this.cycle_number = cycle_number;
+	}
+
+	public void setWaveP(OndaP waveP) {
+		this.waveP = waveP;
+	}
+
+	public void setWaveQ(OndaQ waveQ) {
+		this.waveQ = waveQ;
+	}
+
+	public void setWaveR(OndaR waveR) {
+		this.waveR = waveR;
+	}
+
+	public void setWaveS(OndaS waveS) {
+		this.waveS = waveS;
+	}
+
+	public void setWaveT(OndaT waveT) {
+		this.waveT = waveT;
+	}
+
 	public int getCycle_number() {
 		return cycle_number;
 	}
@@ -80,5 +104,13 @@ public class Ciclo {
 		return "Ciclo [cycle_number=" + cycle_number + ", waveP=" + waveP + ", waveQ=" + waveQ + ", waveR=" + waveR
 				+ ", waveS=" + waveS + ", waveT=" + waveT + ", complejos=" + complejos + ", intervalos=" + intervalos
 				+ "]";
+	}
+
+	public RegistroECG getRegistroPertenece() {
+		return registroPertenece;
+	}
+
+	public void setRegistroPertenece(RegistroECG registroPertenece) {
+		this.registroPertenece = registroPertenece;
 	}
 }

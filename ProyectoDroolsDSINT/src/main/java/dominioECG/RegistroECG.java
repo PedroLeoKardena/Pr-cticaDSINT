@@ -8,13 +8,15 @@ import utilsECG.ECGUtils;
 
 public class RegistroECG {
 	private List<Ciclo> ciclosRegistro = new ArrayList<Ciclo>();
+	private List<Onda> ondasRegistro = new ArrayList<Onda>();
 	private LocalDateTime fechaRegistro;
 	private List<Diagnostico> diagnosticos;
 	private String idRegistro;
 
 	
-	public RegistroECG(List<Ciclo> ciclosRegistro, String id) {
-		this.ciclosRegistro = ciclosRegistro;
+	public RegistroECG(List<Onda> ondas, String id) {
+		this.ondasRegistro = ondas;
+		this.ciclosRegistro = new ArrayList<Ciclo>();
 		this.diagnosticos = new ArrayList<Diagnostico>();
 		fechaRegistro = LocalDateTime.now();
 		idRegistro = id;
@@ -57,6 +59,13 @@ public class RegistroECG {
 	public void addDiagnostico(Diagnostico diagnosis) {
 		diagnosticos.add(diagnosis);
 		diagnosis.setRegistroAsociado(this);
+	}
+	
+	public void addCiclo(Ciclo ciclo) {
+		ciclosRegistro.add(ciclo);
+	}
+	public List<Onda> getOndasRegistro() {
+		return ondasRegistro;
 	}
 	
 }

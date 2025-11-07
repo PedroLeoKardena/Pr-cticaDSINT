@@ -36,27 +36,27 @@ public class Principal {
         contentPane.setLayout(new BorderLayout(10, 10));
         frameMain.setContentPane(contentPane);
 
-        // Crear botón
+        // Crear botï¿½n
         btnCargar = new JButton("Cargar RegistroECG (.ecg)");
 
-        // Crear campo de texto vacío
+        // Crear campo de texto vacï¿½o
         txtEstado = new JTextField();
         txtEstado.setEditable(false); // el usuario no puede escribir
-        txtEstado.setText(""); // inicialmente vacío
+        txtEstado.setText(""); // inicialmente vacï¿½o
 
-        // Añadir observador (listener) al botón
+        // Aï¿½adir observador (listener) al botï¿½n
         btnCargar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Circunstancia: se pulsa el botón
-                System.out.println("Botón pulsado. Procesando archivo ECG...");
+                // Circunstancia: se pulsa el botï¿½n
+                System.out.println("Boton pulsado. Procesando archivo ECG...");
                 new VentanaFicheros();
                 // Simular que ocurre la circunstancia deseada
                 txtEstado.setText("Mirar salida por terminal");
             }
         });
 
-        // Añadir componentes al panel
+        // Aï¿½adir componentes al panel
         contentPane.add(btnCargar, BorderLayout.NORTH);
         contentPane.add(txtEstado, BorderLayout.CENTER);
 	}
