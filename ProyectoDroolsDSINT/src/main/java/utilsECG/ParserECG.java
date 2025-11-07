@@ -11,11 +11,9 @@ public class ParserECG {
 	private static final Pattern ONDA_PATTERN =
             Pattern.compile("(P|Q|R|S|T)\\((\\d+),(\\d+),([\\d.-]+)\\)");
 	
-	public static List<Ciclo> parsearLineas(List<String> lineas) {
-	    List<Ciclo> ciclos = new ArrayList<>();
-	    int numeroCiclo = 1;
-	    
-        OndaP p = null;
+	public static List<Onda> parsearLineas(List<String> lineas) {
+	    List<Onda> ondas = new ArrayList<>();
+	    OndaP p = null;
         OndaQ q = null;
         OndaR r = null;
         OndaS s = null;
@@ -33,30 +31,37 @@ public class ParserECG {
 	            switch (tipo) {
 	                case "P":
 	                	p = new OndaP(start, end, peak);
+	                	ondas.add(p);
 	                	break;
 	                case "Q":
 	                	q = new OndaQ(start, end, peak);
+	                	ondas.add(q);
 	                	break;
 	                case "R":
 	                	r = new OndaR(start, end, peak);
+	                	ondas.add(r);
 	                	break;
 	                case "S":
 	                	s = new OndaS(start, end, peak);
+	                	ondas.add(s);
 	                	break;
 	                case "T":
 	                	t = new OndaT(start, end, peak);
-	                    Ciclo ciclo = new Ciclo(numeroCiclo++, p, q, r, s, t);
+	                    /*Ciclo ciclo = new Ciclo(numeroCiclo++, p, q, r, s, t);
 	                    ciclos.add(ciclo);
 	                    p = null; q = null; r = null; s = null; t = null;
-	                    break;  
+	                    */
+	                	ondas.add(t);
+	                	break;  
 	            }
 	        }
 	    }
 
-	    if (p != null || q != null || r != null || s != null || t != null) {
+	    /*if (p != null || q != null || r != null || s != null || t != null) {
 	        ciclos.add(new Ciclo(numeroCiclo, p, q, r, s, t));
 	    }
+	    */
 	    
-	    return ciclos;
+	    return ondas;
 	}
 }

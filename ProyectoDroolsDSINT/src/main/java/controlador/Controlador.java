@@ -7,8 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import dominioECG.Ciclo;
+import dominioECG.Onda;
 import dominioECG.Persona;
 import dominioECG.RegistroECG;
 import utilsECG.ParserECG;
@@ -26,11 +27,11 @@ public enum Controlador {
 		// Leer archivo
         List<String> lineas = leerArchivoECG(archivoEntrada);
 
-        // Parsear las líneas a objetos Ciclo usando la clase de utils
-        List<Ciclo> ciclos = ParserECG.parsearLineas(lineas);
+        // Parsear las lï¿½neas a objetos Ciclo usando la clase de utils
+        List<Onda> ondas = ParserECG.parsearLineas(lineas);
 
        //Ahora que hemos leido todos los ciclos, podemos crear las instancias necesarias.
-        Controlador.INSTANCE.crearSesion(ciclos);
+        Controlador.INSTANCE.crearSesion(ondas);
         
 	}
 	
@@ -38,17 +39,23 @@ public enum Controlador {
 		personaIniciada = new Persona(edad, idPersona, nombre, sexo);
 	}
 	
-	private void crearSesion(List<Ciclo> ciclos) {
+	private void crearSesion(List<Onda> ondas) {
 		String idRegistro = generarIdAleatorio(NUMERO_CHAR);
-		RegistroECG registroECG = new RegistroECG(ciclos, idRegistro);
+		RegistroECG registroECG = new RegistroECG(ondas, idRegistro);
+		for (Onda onda : ondas) {
+			onda.setRegistroPertenece(registroECG);
+		}
 		personaIniciada.addRegistroECG(registroECG);
 		
-		//Creamos la sesión con la persona.
+		//Creamos la sesiï¿½n con la persona.
 		KieServices ks = KieServices.Factory.get();
 		KieContainer kContainer = ks.getKieClasspathContainer();
 		
 		KieSession kSession = kContainer.newKieSession("ECGSesionStateful1");
-		
+		AtomicInteger contador = new AtomicInteger(0); // Inicializa el contador a 0
+
+		// Enlaza la variable Java con la global declarada en el DRL
+		kSession.setGlobal("cicloContador", contador);
 		kSession.insert(personaIniciada);
 		/*int total = 0;
 		int fired;
@@ -62,7 +69,7 @@ public enum Controlador {
 		*/
 		int num = kSession.fireAllRules();
 		
-		System.out.println("Todas Reglas posibles ejecutadas.\nNº de Reglas ejecutadas: "+num);
+		System.out.println("Todas Reglas posibles ejecutadas.\nNumero de Reglas ejecutadas: "+num);
 		
 	}
 	
