@@ -22,6 +22,8 @@ import dominioECG.Complejo;
 import dominioECG.RitmoCardiaco;
 import dominioECG.Diagnostico;
 import dominioECG.Bradicardia;
+import dominioECG.Taquicardia;
+
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -95,7 +97,7 @@ rule "Crear ciclos"
        	$q : OndaQ(
                 registroPertenece == $registro, // Mismo registro
                 cicloPertenece == null,
-                start_time >= $finp + 70,
+                start_time >= $finp,
 	            start_time <= $finp + 110,
 	            $finq : end_time 
               )
@@ -335,10 +337,11 @@ rule "Asignar Bradicardia Severa"
 		Bradicardia bradi = new Bradicardia(descripcion, nombreDiagnostico);
 		bradi.setRegistroAsociado($r);
 		insert(bradi);
+		System.out.println(descripcion);		
 		
 end
 
-rule "Asignar Bradicardia no Severo"
+rule "Asignar Bradicardia no Severa"
 	when
 		$r: RegistroECG();
 		$rc: RitmoCardiaco(registroAsignado == $r,
@@ -350,5 +353,20 @@ rule "Asignar Bradicardia no Severo"
 		Bradicardia bradi = new Bradicardia(descripcion, nombreDiagnostico);
 		bradi.setRegistroAsociado($r);
 		insert(bradi);
+		System.out.println(descripcion);		
 end
+
+rule "Asignar Taquicardia"
+	when
+		$r: RegistroECG();
+		$rc: RitmoCardiaco(registroAsignado == $r,
+						   valor > 100)
+	then
+		String nombreDiagnostico = new String("Taquicardia");
+		String descripcion = new String("Detectada taquicardia sinusal con respecto al registro: " + $r.getIdRegistro() + " por un ritmo cardiaco cuya frecuencia es superior a los 100 latidos/minuto en reposo: " + $rc.getValor());
+		Taquicardia taqui = new Taquicardia(descripcion, nombreDiagnostico);
+		taqui.setRegistroAsociado($r);
+		insert(taqui);
+		System.out.println(descripcion);
 		
+end
