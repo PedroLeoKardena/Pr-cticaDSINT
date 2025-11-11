@@ -19,6 +19,9 @@ import dominioECG.Ciclo;
 import dominioECG.Intervalo;
 import dominioECG.TipoIntervalo;
 import dominioECG.Complejo;
+import dominioECG.RitmoCardiaco;
+import dominioECG.Diagnostico;
+import dominioECG.Bradicardia;
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -308,8 +311,44 @@ rule "Crear complejo QRS"
         insert(qrs);
 end
 
-//rule "Crear Frecuencia Cardiaca"
+rule "Crear Frecuencia Cardiaca"
+	when
+		$r: RegistroECG()
+		accumulate (Intervalo(tipoIntervalo == TipoIntervalo.RR, registroPertenece == $r, $dur : duracion),
+				    $promRR : average($dur)
+				)   
+	then
+			double bpm = 60000/($promRR);
+			System.out.println("Ritmo cardiaco del registro: " + $r.getIdRegistro() + " = " + bpm);
+			RitmoCardiaco rc = new RitmoCardiaco(bpm, $r);
+			insert(rc);
+end
 
-
+rule "Asignar Bradicardia Severa"
+	when
+		$r: RegistroECG();
+		$rc: RitmoCardiaco(registroAsignado == $r,
+						   valor <= 40)
+	then
+		String nombreDiagnostico = new String("Bradicardia Severa");
+		String descripcion = new String("Detectada bradicardia sinusal SEVERA con respecto al registro: " + $r.getIdRegistro() + " por un ritmo cardiaco cuya frecuencia es inferior a 40 latidos/minuto en reposo: " + $rc.getValor());
+		Bradicardia bradi = new Bradicardia(descripcion, nombreDiagnostico);
+		bradi.setRegistroAsociado($r);
+		insert(bradi);
 		
+end
 
+rule "Asignar Bradicardia no Severo"
+	when
+		$r: RegistroECG();
+		$rc: RitmoCardiaco(registroAsignado == $r,
+						   valor > 40,
+						   valor < 60)
+	then
+		String nombreDiagnostico = new String("Bradicardia no Severa");
+		String descripcion = new String("Detectada bradicardia sinusal con respecto al registro: " + $r.getIdRegistro() + " por un ritmo cardiaco cuya frecuencia es inferior a 60 latidos/minuto en reposo: " + $rc.getValor());
+		Bradicardia bradi = new Bradicardia(descripcion, nombreDiagnostico);
+		bradi.setRegistroAsociado($r);
+		insert(bradi);
+end
+		

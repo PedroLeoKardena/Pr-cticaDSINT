@@ -13,12 +13,12 @@ public class RitmoCardiaco {
         return valor;
     }
 
-    public RegistroECG getRegistro() {
+    public RegistroECG getRegistroAsignado() {
         return registroAsignado;
     }
 
     @Override
     public String toString() {
-        return "Ritmo cardíaco del registro " + registroAsignado.getIdRegistro() + ": " + valor + " bpm";
+        return "Ritmo cardï¿½aco del registro " + registroAsignado.getIdRegistro() + ": " + valor + " bpm";
     }
 }
