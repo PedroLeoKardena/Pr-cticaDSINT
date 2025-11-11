@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import dominioECG.Onda;
@@ -20,18 +22,32 @@ import org.kie.api.runtime.KieSession;
 
 public enum Controlador {
 	INSTANCE;
+	private Set<String> ficherosCargados = new HashSet<>();
 	private Persona personaIniciada;
 	private static final int NUMERO_CHAR = 5;
 	
-	public void tratarArchivo(File archivoEntrada) {
-		// Leer archivo
-        List<String> lineas = leerArchivoECG(archivoEntrada);
+	public boolean tratarArchivo(File archivoEntrada) {
+		
+		String nombre = archivoEntrada.getName();
+		if(ficherosCargados.add(nombre)) {
+			// Leer archivo
+	        List<String> lineas = leerArchivoECG(archivoEntrada);
 
-        // Parsear las l�neas a objetos Ciclo usando la clase de utils
-        List<Onda> ondas = ParserECG.parsearLineas(lineas);
+	        // Parsear las l�neas a objetos Ciclo usando la clase de utils
+	        List<Onda> ondas = ParserECG.parsearLineas(lineas);
+	        
+	        String idRegistro = generarIdAleatorio(NUMERO_CHAR);
+			RegistroECG registroECG = new RegistroECG(ondas, idRegistro);
+			for (Onda onda : ondas) {
+				onda.setRegistroPertenece(registroECG);
+			}
+			personaIniciada.addRegistroECG(registroECG);
+			return true;
+		}else {
+			return false;
+		}
 
-       //Ahora que hemos leido todos los ciclos, podemos crear las instancias necesarias.
-        Controlador.INSTANCE.crearSesion(ondas);
+		
         
 	}
 	
@@ -39,14 +55,7 @@ public enum Controlador {
 		personaIniciada = new Persona(edad, idPersona, nombre, sexo);
 	}
 	
-	private void crearSesion(List<Onda> ondas) {
-		String idRegistro = generarIdAleatorio(NUMERO_CHAR);
-		RegistroECG registroECG = new RegistroECG(ondas, idRegistro);
-		for (Onda onda : ondas) {
-			onda.setRegistroPertenece(registroECG);
-		}
-		personaIniciada.addRegistroECG(registroECG);
-		
+	public void crearSesion() {
 		//Creamos la sesi�n con la persona.
 		KieServices ks = KieServices.Factory.get();
 		KieContainer kContainer = ks.getKieClasspathContainer();

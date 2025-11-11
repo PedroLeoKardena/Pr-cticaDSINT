@@ -28,8 +28,13 @@ public class VentanaFicheros {
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoSeleccionado = fileChooser.getSelectedFile();
             
-            Controlador.INSTANCE.tratarArchivo(archivoSeleccionado);
-            
+            boolean archivoInsertado = Controlador.INSTANCE.tratarArchivo(archivoSeleccionado);
+            if(!archivoInsertado) {
+            	JOptionPane.showMessageDialog(null, 
+                        "Este fichero ya ha sido insertado.", 
+                        "Fichero duplicado", 
+                        JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
 	
