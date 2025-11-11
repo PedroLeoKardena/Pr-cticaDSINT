@@ -19,7 +19,6 @@ import javax.swing.JTextField;
 import controlador.Controlador;
 
 public class Inicio {
-	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JFrame frameRegister;
 	private JButton aceptarButton;
@@ -130,12 +129,12 @@ public class Inicio {
         cancelarButton.addActionListener(e ->{
         	 int respuesta = JOptionPane.showOptionDialog(
                      null, 
-                     "¿Deseas cancelar el registro?", 
+                     "Â¿Deseas cancelar el registro?", 
                      "Advertencia", 
                      JOptionPane.YES_NO_OPTION, 
                      JOptionPane.WARNING_MESSAGE, 
                      null, 
-                     new Object[]{"Sí", "No"}, 
+                     new Object[]{"Sï¿½", "No"}, 
                      "No"
              );
         	 if (respuesta == JOptionPane.YES_OPTION) {

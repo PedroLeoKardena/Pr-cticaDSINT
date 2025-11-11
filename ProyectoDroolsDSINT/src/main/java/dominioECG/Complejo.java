@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Complejo {
 	private List<Onda> ondasCompuesto = new ArrayList<Onda>();
+	private RegistroECG registroAsociado;
 	private int tiempoInicio;
 	private int tiempoFin;
 	
@@ -28,6 +29,14 @@ public class Complejo {
 	
 	public int getDuracion() {
 		return tiempoFin - tiempoInicio;
+	}
+
+	public RegistroECG getRegistroAsociado() {
+		return registroAsociado;
+	}
+
+	public void setRegistroAsociado(RegistroECG registroAsociado) {
+		this.registroAsociado = registroAsociado;
 	}
 	
 	

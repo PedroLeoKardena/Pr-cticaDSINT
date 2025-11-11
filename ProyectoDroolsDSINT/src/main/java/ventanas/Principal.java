@@ -5,19 +5,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import controlador.Controlador;
 
 public class Principal {
 	
 	private JPanel contentPane;
 	private JFrame frameMain;
     private JButton btnCargar;
+    private JButton btnLanzarVeredicto;
     private JTextField txtEstado;
     
 	public Principal() {
 		iniciar();
 		mostrarVentana();
+	}
+	
+	public void cerrar() {
+		this.frameMain.dispose();
 	}
 	
 	public void mostrarVentana() {
@@ -38,6 +46,7 @@ public class Principal {
 
         // Crear bot�n
         btnCargar = new JButton("Cargar RegistroECG (.ecg)");
+        btnLanzarVeredicto = new JButton("Pedir Resultados");
 
         // Crear campo de texto vac�o
         txtEstado = new JTextField();
@@ -52,13 +61,37 @@ public class Principal {
                 System.out.println("Boton pulsado. Procesando archivo ECG...");
                 new VentanaFicheros();
                 // Simular que ocurre la circunstancia deseada
-                txtEstado.setText("Mirar salida por terminal");
+                txtEstado.setText("Procesando archivo ECG...");
             }
+        });
+        
+        btnLanzarVeredicto.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int opcion = JOptionPane.showConfirmDialog(
+			            null,
+			            "¿Estás seguro que quieres lanzar la sesión y acceder a los resultados?\n" +
+			            "Asegúrate de haber introducido todos los registros (.ecg) para hacer los resultados acordes a ellos,\n" + 
+			            "ya que la aplicación se cerrará una vez lanzada la sesión.",
+			            "Confirmación",
+			            JOptionPane.YES_NO_OPTION,
+			            JOptionPane.WARNING_MESSAGE
+			        );
+
+			        if (opcion == JOptionPane.YES_OPTION) {
+			        	Controlador.INSTANCE.crearSesion();
+			        	cerrar();
+			        }
+				
+			}
+			
         });
 
         // A�adir componentes al panel
         contentPane.add(btnCargar, BorderLayout.NORTH);
         contentPane.add(txtEstado, BorderLayout.CENTER);
+        contentPane.add(btnLanzarVeredicto, BorderLayout.SOUTH);
 	}
 	
 }

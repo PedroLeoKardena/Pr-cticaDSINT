@@ -4,6 +4,7 @@ public class Intervalo {
 	private int tiempoInicio;
 	private int tiempoFin;
 	private TipoIntervalo tipoIntervalo;
+	private RegistroECG registroPertenece;
 	
 	public Intervalo(int tiempoInicio, int tiempoFin, TipoIntervalo tipo) {
 		this.tiempoInicio = tiempoInicio;
@@ -25,5 +26,13 @@ public class Intervalo {
 	
 	public int getDuracion() {
 		return tiempoFin-tiempoInicio;
+	}
+
+	public RegistroECG getRegistroPertenece() {
+		return registroPertenece;
+	}
+
+	public void setRegistroPertenece(RegistroECG registroPertenece) {
+		this.registroPertenece = registroPertenece;
 	}
 }

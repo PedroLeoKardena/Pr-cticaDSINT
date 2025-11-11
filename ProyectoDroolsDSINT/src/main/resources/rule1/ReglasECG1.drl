@@ -16,6 +16,9 @@ import dominioECG.OndaR;
 import dominioECG.OndaS;
 import dominioECG.OndaT;
 import dominioECG.Ciclo;
+import dominioECG.Intervalo;
+import dominioECG.TipoIntervalo;
+import dominioECG.Complejo;
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -44,7 +47,7 @@ rule "Insertar ondas"
         $r: RegistroECG();
         not RegistroProcesado( registroId == $r.getIdRegistro() )
     then
-	    System.out.println("Insertamos ondas del registro con ID: " + $r.getIdRegistro());
+	    System.out.println("Insertamos ondas del registro con ID: " + $r.getIdRegistro() + ".");
 	    List<Onda> ondas= $r.getOndasRegistro();
 
 	    for (int i = 0; i < ondas.size() - 1; i++) {
@@ -81,31 +84,41 @@ rule "Crear ciclos"
         //comprobaciones con ondaQ
         $p : OndaP(
                 registroPertenece == $registro, // Debe pertenecer a este $registro
-                cicloPertenece == null
+                cicloPertenece == null,
+                $finp : end_time
               )
         
         // Encontramos OndaQ (margen 70-120ms desde inicio OndaP)
        	$q : OndaQ(
                 registroPertenece == $registro, // Mismo registro
-                cicloPertenece == null
+                cicloPertenece == null,
+                start_time >= $finp + 70,
+	            start_time <= $finp + 110,
+	            $finq : end_time 
               )
               
         // Encontramos OndaR (margen Q-R: ±5ms)
         $r : OndaR(
                 registroPertenece == $registro, // Mismo registro
-                cicloPertenece == null
+                cicloPertenece == null,
+                start_time == $finq,
+                $finr : end_time
               )
               
         // Encontramos OndaS (margen R-S: ±5ms) 
         $s : OndaS(
                 registroPertenece == $registro, // Mismo registro
-                cicloPertenece == null
+                cicloPertenece == null,
+                start_time == $finr,
+                $fins : end_time
               )
         
         // Encontramos OndaT (margen S-T: ±5ms)
         $t : OndaT(
                 registroPertenece == $registro, // Mismo registro
-                cicloPertenece == null
+                cicloPertenece == null,
+                start_time >= $fins + 120,
+	            start_time <= $fins + 160
               )     
          
 	then	
@@ -138,6 +151,164 @@ rule "Crear ciclos"
 		insert(ciclo);
 end
 
+
+rule "Crear intervalos PP Persona" //Dos ciclos
+    when
+    	$r: RegistroECG()
+    	$p1 : OndaP(
+	        registroPertenece == $r, // Comprueba que pertenece a $r
+	        cicloPertenece != null,
+	        $nciclo : cicloPertenece.cycle_number 
+	    )
+	    $p2 : OndaP(
+	        registroPertenece == $r,
+	        cicloPertenece != null,
+	        cicloPertenece.cycle_number == $nciclo + 1 
+	    )
+    then
+	    System.out.println("Creacion intervalo PP para ciclos: " + $nciclo + " y "+ $p2.getCicloPertenece().getCycle_number() + " del registro: " + $r.getIdRegistro());
+	    Intervalo intervaloPP = new Intervalo($p1.getStart_time(), $p2.getStart_time(), TipoIntervalo.PP);
+	    intervaloPP.setRegistroPertenece($r);
+	    insert(intervaloPP);
+end
+
+rule "Crear intervalos RR Persona" //Dos ciclos
+    when
+    	$r: RegistroECG()
+    	$r1 : OndaP(
+	        registroPertenece == $r, // Comprueba que pertenece a $r
+	        cicloPertenece != null,
+	        $nciclo : cicloPertenece.cycle_number 
+	    )
+	    $r2 : OndaP(
+	        registroPertenece == $r,
+	        cicloPertenece != null,
+	        cicloPertenece.cycle_number == $nciclo + 1 
+	    )
+    then
+	    System.out.println("Creacion intervalo RR para ciclos: " + $nciclo + " y "+ $r2.getCicloPertenece().getCycle_number() + " del registro: " + $r.getIdRegistro());
+	    Intervalo intervaloRR = new Intervalo($r1.getStart_time(), $r2.getStart_time(), TipoIntervalo.RR);
+	    intervaloRR.setRegistroPertenece($r);
+	    insert(intervaloRR);
+end
+
+rule "Crear intervalos PR Persona" //Dos ciclos
+    when
+    	$r: RegistroECG()
+    	$p : OndaP(
+            registroPertenece == $r, // Debe pertenecer a este $registro
+            cicloPertenece != null,
+            $nciclo : cicloPertenece.cycle_number
+          )
+    	$wR: OndaR(
+    		registroPertenece == $r,
+    		cicloPertenece != null,
+    		cicloPertenece.cycle_number == $nciclo
+    	)
+    then
+	    System.out.println("Creacion intervalo PR para ciclo: " + $nciclo + " del registro: " + $r.getIdRegistro());
+	    Intervalo intervaloPR = new Intervalo($p.getStart_time(), $wR.getStart_time(), TipoIntervalo.PR);
+	    intervaloPR.setRegistroPertenece($r);
+	    insert(intervaloPR);
+end
+
+
+rule "Crear intervalos QT Persona" //Dos ciclos
+    when
+    	$r: RegistroECG()
+    	$q : OndaQ(
+                registroPertenece == $r, // Debe pertenecer a este $registro
+                cicloPertenece != null,
+                $nciclo : cicloPertenece.cycle_number
+              )
+    	$t: OndaT(
+    		registroPertenece == $r,
+    		cicloPertenece != null,
+    		cicloPertenece.cycle_number == $nciclo
+    	)
+    then
+	    System.out.println("Creacion intervalo QT para ciclo: " + $nciclo + " del registro: " + $r.getIdRegistro());
+	    Intervalo intervaloQT = new Intervalo($q.getStart_time(), $t.getEnd_time(), TipoIntervalo.QT);
+	    intervaloQT.setRegistroPertenece($r);
+	    insert(intervaloQT);
+end
+
+
+rule "Crear intervalos ST Persona"
+    when
+    	$r: RegistroECG()
+    	$s : OndaS(
+                registroPertenece == $r, // Debe pertenecer a este $registro
+                cicloPertenece != null,
+                $nciclo : cicloPertenece.cycle_number
+              )
+    	$t: OndaT(
+    		registroPertenece == $r,
+    		cicloPertenece != null,
+    		cicloPertenece.cycle_number == $nciclo
+    	)
+    then
+	    System.out.println("Creacion intervalo ST para ciclo: " + $nciclo + " del registro: " + $r.getIdRegistro());
+	    Intervalo intervaloST = new Intervalo($s.getEnd_time(), $t.getStart_time(), TipoIntervalo.ST);
+	    intervaloST.setRegistroPertenece($r);
+	    insert(intervaloST);
+end
+
+rule "Crear intervalos TP Persona" //Dos ciclos
+    when
+    	$r: RegistroECG()
+    	$t : OndaP(
+                registroPertenece == $r, // Debe pertenecer a este $registro
+                cicloPertenece != null,
+                $nciclo : cicloPertenece.cycle_number
+              )
+    	$p: OndaP(
+    		registroPertenece == $r,
+    		cicloPertenece != null,
+    		cicloPertenece.cycle_number == $nciclo+1
+    	)
+    then
+	    System.out.println("Creacion intervalo TP para ciclos: " + $nciclo + " y "+ $p.getCicloPertenece().getCycle_number() + " del registro: " + $r.getIdRegistro());
+	    Intervalo intervaloTP = new Intervalo($t.getStart_time(), $p.getStart_time(), TipoIntervalo.TP);
+	    intervaloTP.setRegistroPertenece($r);
+	    insert(intervaloTP);
+end
+
+rule "Crear complejo QRS"
+	when
+	    $r: RegistroECG()
+    	$q : OndaQ(
+            registroPertenece == $r, // Debe pertenecer a este $registro
+            cicloPertenece != null,
+            $nciclo : cicloPertenece.cycle_number
+        )
+        $wR: OndaR(
+    		registroPertenece == $r,
+    		cicloPertenece != null,
+    		cicloPertenece.cycle_number == $nciclo
+    	)
+    	$s : OndaS(
+            registroPertenece == $r, // Debe pertenecer a este $registro
+            cicloPertenece != null,
+            cicloPertenece.cycle_number == $nciclo
+          )
+	then
+		System.out.println("Creacion complejo QRS del ciclo: " + $nciclo + " del registro: " + $r.getIdRegistro());
+	    
+	    List<Onda> ondas = new ArrayList<>();
+        ondas.add($q);
+        ondas.add($wR);
+        ondas.add($s);
+
+        int tiempoInicio = $q.getStart_time();
+        int tiempoFin = $s.getEnd_time();
+
+        Complejo qrs = new Complejo(ondas, tiempoInicio, tiempoFin);
+        qrs.setRegistroAsociado($r);
+        insert(qrs);
+end
+
+//rule "Crear Frecuencia Cardiaca"
 
 
 		
