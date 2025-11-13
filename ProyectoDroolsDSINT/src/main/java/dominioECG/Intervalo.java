@@ -35,4 +35,5 @@ public class Intervalo {
 	public void setRegistroPertenece(RegistroECG registroPertenece) {
 		this.registroPertenece = registroPertenece;
 	}
+
 }
