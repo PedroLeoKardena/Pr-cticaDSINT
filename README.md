@@ -9,3 +9,4 @@
 ### Fuente para Calculo Diagnostico de Patrones anormales complejos del ECG e hipótesis diagnósticas asociadas:
  - https://www.bem.fi/book/19/19.htm
  - https://alivecor.com/press/press_release/fda-grants-first-ever-clearances-to-detect-bradycardia-and-tachycardia-on-a-personal-ecg-device
+ - Para PVC: https://www.bem.fi/book/19/19.htm : Prematuridad del QRS, QRS ancho y Ausencia de onda P previa (no hay onda P después de QRS en x ms)
