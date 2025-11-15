@@ -7,6 +7,7 @@
 ### Fuente Calculo valor Ritmo Cardiaco: 
  - https://www.ijrte.org/portfolio-item/d72941111422 
 ### Fuente para Calculo Diagnostico de Patrones anormales complejos del ECG e hipótesis diagnósticas asociadas:
+ - Tipos bradicardia: https://www.shaio.org/bradicardia
  - https://www.bem.fi/book/19/19.htm
  - https://alivecor.com/press/press_release/fda-grants-first-ever-clearances-to-detect-bradycardia-and-tachycardia-on-a-personal-ecg-device
  - Para PVC :
