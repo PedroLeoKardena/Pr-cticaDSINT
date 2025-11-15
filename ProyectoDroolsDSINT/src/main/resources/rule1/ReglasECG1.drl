@@ -25,6 +25,7 @@ import dominioECG.Bradicardia;
 import dominioECG.Taquicardia;
 import dominioECG.ContraccionVentricularPrematura;
 import dominioECG.Hipocalemia;
+import dominioECG.IAM;
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -121,7 +122,7 @@ rule "Crear ciclos"
                 $fins : end_time
               )
         
-        // Encontramos OndaT (margen S-T: ±5ms)
+        // Encontramos OndaT
         $t : OndaT(
                 registroPertenece == $registro, // Mismo registro
                 cicloPertenece == null,
@@ -379,7 +380,7 @@ end
 rule "Detectar hipocalcemia"
 	when
 		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un segmento prolongado:
-		//QT > 460 (en el caso de mujeres) o QT > 450 (en el caso de hombres).
+		//QT > 460 (en el caso de mujeres) o QT > 440 (en el caso de hombres).
 	    Persona( $sexo : sexo )
 	    $r: RegistroECG();
 	    
@@ -404,7 +405,7 @@ rule "Detectar hipocalcemia"
 	        "Detectado patrón sugestivo de Hipocalcemia en el registro: " + $r.getIdRegistro() + 
 	        ". Características: " +
 	        "- Intervalo QT prolongado (" + $intervaloQT.getDuracion() + " ms > " + 
-	          ($sexo == "F" ? "460" : "450") + " ms). " +
+	          ($sexo == "F" ? "460" : "440") + " ms). " +
 	        "- Este patrón electrocardiográfico sugiere posible hipocalcemia. " +
 	        "- Ciclo afectado: " + $nciclo + ". " +
 	        "La hipocalcemia prolonga el intervalo QT principalmente por alargamiento del segmento ST, " +
@@ -418,7 +419,7 @@ rule "Detectar hipocalcemia"
     	System.out.println(descripcion);
 end
 
-/*rule "Detectar hipopotosemia"
+/*rule "Detectar hipopotasemia"
 	when
 		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un Intervalo PR > 220 ms y si tenemos
 		//un segmento con depresion -> Con una profundidad de mas de > 0.1 y una duración de mas de 200ms.
@@ -539,11 +540,66 @@ end
 
 rule "Detectar Isquemia Coronaria"
 	when
+	
 	then
 end
 
-rule "Detectar Infarto Agudo de Miocardio."
+rule "Detectar Infarto Agudo de Miocardio." //Ampliar condiciones si se ve necesario.
 	when
+		//Tenemos que detectar ondas T extremadamentes agudas. Para ello buscamos ondas T cuya amplitud absoluta en
+		//comparación con la amplitud absoluta total de las ondas del complejo QRS de ese mismo ciclo sea mayor de un
+		//36%. Luego debemos observar que esta onda T tenga un valor de amplitud de pico superior a 0.8 mV para mujeres
+		//y 1 mV para hombres.
+		Persona( $sexo : sexo )
+		 
+		$r: RegistroECG()
+		
+		// Verificamos que NO existe ya un diagnóstico IAM para este registro
+    	not( IAM( registroECG == $r ) )
+		
+		$t : OndaT( registroPertenece == $r, 
+					cicloPertenece != null ,
+					$nciclo : cicloPertenece.cycle_number,
+					( $sexo == "F" && peak_amplitude > 0.8 ) || ( $sexo == "M" && peak_amplitude > 1.0 ), 
+					$amplitudT : peak_amplitude,
+					$inicioT : start_time)
+		
+		//Comprobamos que este complejo sea del mismo ciclo que T fijandonos en el tiempo de inicio de T
+		$qrs : Complejo(
+		    registroAsociado == $r,
+		    $ondas : ondasCompuesto,
+		    tiempoFin <= $inicioT-120,
+		    tiempoFin >= $inicioT-260
+		)
+	
+		//Calculamos la amplitud absoluta de QRS
+		$sumAmplitudQRS : Double() from accumulate(
+		    Onda($amp : peak_amplitude) from $ondas,
+		    sum(Math.abs($amp))
+		)
+		
+		//Hacemos la evaluacion
+		eval( ($amplitudT / $sumAmplitudQRS) >= 0.36 )
 	then
+		String nombreDiagnostico = new String("Infarto Agudo de Miocardio (IAM)");
+
+	    // Construimos la descripción
+	    String descripcion = new String("Detectado Infarto Agudo de Miocardio (IAM) en el registro: " + $r.getIdRegistro() +
+	                         ". Características: " +
+	                         "- Onda T hiperaguda en el ciclo " + $nciclo + " (amplitud: " + $amplitudT + " mV). " +
+	                         "- Complejo QRS del mismo ciclo con amplitud absoluta total: " + $sumAmplitudQRS + " mV. " +
+	                         "- Ratio T/QRS: " + String.format("%.2f", ($amplitudT / $sumAmplitudQRS)*100) + "% (>36%). " +
+	                         "- Umbral de amplitud de T: " + ($sexo.equals("F") ? "0.8 mV" : "1.0 mV") + ". " +
+	                         "Esto indica una onda T extremadamente aguda, sugestiva de IAM.");
+		// Creamos el objeto IAM y asociamos información
+	    IAM iam = new IAM(descripcion, nombreDiagnostico);
+	    iam.setRegistroAsociado($r);
+	    iam.setnCicloAfectado($nciclo);
+	    iam.setAmplitudT($amplitudT);
+    	iam.setAmplitudQRS($sumAmplitudQRS);
+    	
+    	insert(iam);
+		System.out.println(descripcion);
+	                         
 end
 
