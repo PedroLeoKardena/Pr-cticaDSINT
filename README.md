@@ -20,3 +20,5 @@
      - Obtención de lo que se consideran valores Intervalo PR prolongado: https://ecgwaves.com/docs/reference-values-for-adult-ecg/
      - Obtención de lo que se consideran valores Segmento ST alargado (depresión): https://cardiologiaarritmias.com/hipocalcemia-en-ecg
  - Hipocalcemia: https://litfl.com/qt-interval-ecg-library/#:~:text=Represents%20time%20taken%20for%20ventricular,shortens%20at%20faster%20heart%20rates ; https://en.wikipedia.org/wiki/Hypocalcemia (Información sobre intervalos QT prolongados)
+ - IAM: https://www.emdocs.net/ecg-pointers-post-myocardial-infarction-complications-lv-aneurysm/ + https://litfl.com/omi-replacing-the-stemi-misnomer + https://internetbookofemergencymedicine.com/2025/06/04/april-2025-monthly-review/ + descripción wikipedia: https://en.wikipedia.org/w/index.php?title=Electrocardiography&oldid=513556137#Some_pathological_patterns_which_can_be_seen_on_the_ECG
+ - Isquemia Coronaria:
