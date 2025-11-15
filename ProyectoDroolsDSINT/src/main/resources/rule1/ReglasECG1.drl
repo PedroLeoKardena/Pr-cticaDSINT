@@ -23,7 +23,8 @@ import dominioECG.RitmoCardiaco;
 import dominioECG.Diagnostico;
 import dominioECG.Bradicardia;
 import dominioECG.Taquicardia;
-
+import dominioECG.ContraccionVentricularPrematura;
+import dominioECG.Hipocalemia;
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -106,7 +107,8 @@ rule "Crear ciclos"
         $r : OndaR(
                 registroPertenece == $registro, // Mismo registro
                 cicloPertenece == null,
-                start_time == $finq,
+                start_time >= $finq,
+                start_time <= $finq + 20,
                 $finr : end_time
               )
               
@@ -114,7 +116,8 @@ rule "Crear ciclos"
         $s : OndaS(
                 registroPertenece == $registro, // Mismo registro
                 cicloPertenece == null,
-                start_time == $finr,
+                start_time >= $finr,
+                start_time <= $finr + 20,
                 $fins : end_time
               )
         
@@ -123,7 +126,7 @@ rule "Crear ciclos"
                 registroPertenece == $registro, // Mismo registro
                 cicloPertenece == null,
                 start_time >= $fins + 120,
-	            start_time <= $fins + 160
+	            start_time <= $fins + 260
               )     
          
 	then	
@@ -157,7 +160,7 @@ rule "Crear ciclos"
 end
 
 
-rule "Crear intervalos PP Persona" //Dos ciclos
+rule "Crear intervalos PP Persona" //Dos ciclos, en estos intervalos no calcularemos el incremento de amplitud, le daremos valor 0.
     when
     	$r: RegistroECG()
     	$p1 : OndaP(
@@ -177,7 +180,7 @@ rule "Crear intervalos PP Persona" //Dos ciclos
 	    insert(intervaloPP);
 end
 
-rule "Crear intervalos RR Persona" //Dos ciclos
+rule "Crear intervalos RR Persona" //Dos ciclos, en estos intervalos no calcularemos el incremento de amplitud, le daremos valor 0.
     when
     	$r: RegistroECG()
     	$r1 : OndaP(
@@ -239,19 +242,21 @@ rule "Crear intervalos QT Persona" //Dos ciclos
 end
 
 
-rule "Crear intervalos ST Persona"
+rule "Crear intervalos ST Persona (segmentos)"
     when
     	$r: RegistroECG()
     	$s : OndaS(
                 registroPertenece == $r, // Debe pertenecer a este $registro
                 cicloPertenece != null,
-                $nciclo : cicloPertenece.cycle_number
+                $nciclo : cicloPertenece.cycle_number,
+                $amplitudS : peak_amplitude
               )
     	$t: OndaT(
-    		registroPertenece == $r,
-    		cicloPertenece != null,
-    		cicloPertenece.cycle_number == $nciclo
-    	)
+	    		registroPertenece == $r,
+	    		cicloPertenece != null,
+	    		cicloPertenece.cycle_number == $nciclo,
+	    		$amplitudT : peak_amplitude
+	    	)
     then
 	    System.out.println("Creacion intervalo ST para ciclo: " + $nciclo + " del registro: " + $r.getIdRegistro());
 	    Intervalo intervaloST = new Intervalo($s.getEnd_time(), $t.getStart_time(), TipoIntervalo.ST);
@@ -326,7 +331,7 @@ rule "Crear Frecuencia Cardiaca"
 			insert(rc);
 end
 
-rule "Asignar Bradicardia Severa"
+rule "Detectar Bradicardia Severa"
 	when
 		$r: RegistroECG();
 		$rc: RitmoCardiaco(registroAsignado == $r,
@@ -341,7 +346,7 @@ rule "Asignar Bradicardia Severa"
 		
 end
 
-rule "Asignar Bradicardia no Severa"
+rule "Detectar Bradicardia no Severa"
 	when
 		$r: RegistroECG();
 		$rc: RitmoCardiaco(registroAsignado == $r,
@@ -356,7 +361,7 @@ rule "Asignar Bradicardia no Severa"
 		System.out.println(descripcion);		
 end
 
-rule "Asignar Taquicardia"
+rule "Detectar Taquicardia"
 	when
 		$r: RegistroECG();
 		$rc: RitmoCardiaco(registroAsignado == $r,
@@ -370,3 +375,175 @@ rule "Asignar Taquicardia"
 		System.out.println(descripcion);
 		
 end
+
+rule "Detectar hipocalcemia"
+	when
+		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un segmento prolongado:
+		//QT > 460 (en el caso de mujeres) o QT > 450 (en el caso de hombres).
+	    Persona( $sexo : sexo )
+	    $r: RegistroECG();
+	    
+	    $q : OndaQ(
+                cicloPertenece != null,
+                $inicioQ : start_time,
+                $nciclo : cicloPertenece.cycle_number
+              )
+              
+	    $intervaloQT : Intervalo(
+	        registroPertenece == $r,
+	        tipoIntervalo == TipoIntervalo.QT,
+	        tiempoInicio == $inicioQ,
+	        // Aplicamos umbrales diferentes según el sexo
+	        (($sexo == "F" && duracion > 460) || 
+	         ($sexo == "M" && duracion > 440))
+	    )
+	    
+	then
+		String nombreDiagnostico = new String("Hipocalcemia");
+	    String descripcion = new String(
+	        "Detectado patrón sugestivo de Hipocalcemia en el registro: " + $r.getIdRegistro() + 
+	        ". Características: " +
+	        "- Intervalo QT prolongado (" + $intervaloQT.getDuracion() + " ms > " + 
+	          ($sexo == "F" ? "460" : "450") + " ms). " +
+	        "- Este patrón electrocardiográfico sugiere posible hipocalcemia. " +
+	        "- Ciclo afectado: " + $nciclo + ". " +
+	        "La hipocalcemia prolonga el intervalo QT principalmente por alargamiento del segmento ST, " +
+	        "lo que aumenta el riesgo de arritmias ventriculares. Se recomienda confirmar con niveles séricos de calcio ionizado."
+	    );
+	    
+	    Hipocalemia diagnosticoHipocalcemia = new Hipocalemia(descripcion, nombreDiagnostico);
+	    diagnosticoHipocalcemia.setRegistroAsociado($r);
+	    diagnosticoHipocalcemia.setnCicloAfectado($nciclo);
+	    insert(diagnosticoHipocalcemia);
+    	System.out.println(descripcion);
+end
+
+/*rule "Detectar hipopotosemia"
+	when
+		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un Intervalo PR > 220 ms y si tenemos
+		//un segmento con depresion -> Con una profundidad de mas de > 0.1 y una duración de mas de 200ms.
+		//Para calcular la profundidad usaremos las ondas en si.
+		$r: RegistroECG();
+		
+		//Encontramos ondas P y S, de los Segmentos ST e Intervalos PR, que pertenezcan al registro y sean 
+		//del mismo ciclo.
+		$p : OndaP( registroPertenece == $r, 
+					cicloPertenece != null ,
+					$ciclo : cicloPertenece, 
+					$inicioP : start_time )
+		$s : OndaS(
+                cicloPertenece == $ciclo,
+                $finS : end_time,
+                $amplitudS : peak_amplitude 
+              )
+        
+        $t : OndaT(
+                cicloPertenece == $ciclo,
+                $amplitudT : peak_amplitude 
+              )
+        
+        //Vemos a ver si tenemos un intervaloPR mayor que 220 ms      
+        $intervaloPR : Intervalo(
+	        registroPertenece == $r,
+	        tipoIntervalo == TipoIntervalo.PR,
+	        tiempoInicio == $inicioP,
+	        duracion > 220
+   		)
+   		
+   		//Vemos a ver si hay un Segmento ST (nosotros lo tenemos como Intervalo) que sea prolongado
+   		$segmentoST : Intervalo(
+	        registroPertenece == $r,
+	        tipoIntervalo == TipoIntervalo.ST,
+	        tiempoInicio == $finS,
+	        // Aplicamos umbrales diferentes según el sexo
+	        duracion > 200
+	    )
+   		       
+	then
+		String nombreDiagnostico = new String("Hipopotasemia");
+	    
+	    Hipocalemia diagnosticoHipocalcemia = new Hipocalemia(descripcion, nombreDiagnostico);
+	    diagnosticoHipocalcemia.setRegistroAsociado($r);
+	    diagnosticoHipocalcemia.setnCicloAfectado($ciclo.getCycle_number());
+	    
+	    insert(diagnosticoHipocalcemia);
+		System.out.println(descripcion);
+end
+*/
+
+rule "Detectar PVC"
+	when
+		$r: RegistroECG()
+		
+		accumulate (Intervalo(tipoIntervalo == TipoIntervalo.RR, registroPertenece == $r, $dur : duracion),
+				    $promRR : average($dur)
+				)
+		//Calculamos promedio para saber si hay Prematuridad del QRS (RR_anterior < 0.8 × RR_promedio)
+		
+		$p : OndaP( registroPertenece == $r, 
+					cicloPertenece != null ,
+					$nciclo : cicloPertenece.cycle_number, 
+					$finP : end_time )
+		//Onda P para detectar si hay Ausencia de onda P previa
+		
+		$qrs : Complejo(
+		    registroAsociado == $r,
+		    $inicioQRS : tiempoInicio,
+		    $finQRS : tiempoFin,
+		    $durQRS : duracion,
+		    $ondas : ondasCompuesto 
+		)
+		
+		// Extraer onda R del complejo con verificación de tipo segura
+	    $onda : Onda() from $ondas
+	    eval($onda instanceof dominioECG.OndaR)
+	    $ondaRcomp: dominioECG.OndaR(this == $onda, cicloPertenece != null, $cicloR : cicloPertenece)			
+		
+		// Comprobamos que el complejo es del mismo ciclo que la onda P (con verificación de null)
+		eval($nciclo == $cicloR.getCycle_number())
+			
+		$rr_prev : Intervalo(
+	        registroPertenece == $r,
+	        tipoIntervalo == TipoIntervalo.RR,
+	        $durRR : duracion,
+	        // suponiendo que la onda R final de este RR es la que precede al inicio de la actual
+	        $finRR : tiempoFin
+   		)
+   		
+   		//Comprobamos que se trata del intervalo RR anterior al complejo QRS.
+	    eval(Math.abs($ondaRcomp.getStart_time() - $finRR) < 0.001)
+	  		
+	    eval($durRR < 0.8 * $promRR) // prematuridad
+    	eval($durQRS > 120)          // QRS ancho
+    	eval($inicioQRS - $finP > 0.2 * $promRR) // separación excesiva → sin P previa
+    	
+	then
+		String nombreDiagnostico = new String("Contraccion Ventricular Prematura");
+		String descripcion = new String(
+		    "Detectada Contraccion Ventricular Prematura (PVC) en el registro: " + $r.getIdRegistro() + 
+		    ". Características: " +
+		    "- Intervalo RR anterior (" + $durRR + " ms) es prematuro (< 80% del promedio RR: " + $promRR + " ms). " +
+		    "- Complejo QRS ancho (" + $durQRS + " ms > 100 ms). " +
+		    "- Ausencia de onda P previa (separación OndaP-QRS: " + ($inicioQRS - $finP) + " ms > 20% del RR promedio). " +
+		    "* Ciclo afectado: " + $nciclo + ". " +
+		    "Esto indica un latido de origen ventricular que interrumpe el ritmo cardiaco normal."
+		);
+		
+		ContraccionVentricularPrematura cvp = new ContraccionVentricularPrematura(descripcion, nombreDiagnostico);
+		cvp.setRegistroAsociado($r);
+		cvp.setnCicloAfectado($nciclo);
+		
+		insert(cvp);
+		System.out.println(descripcion);
+end
+
+rule "Detectar Isquemia Coronaria"
+	when
+	then
+end
+
+rule "Detectar Infarto Agudo de Miocardio."
+	when
+	then
+end
+
