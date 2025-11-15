@@ -1,1 +1,22 @@
 # ProyectoDSINT 📊
+
+## Fuentes para recopilar Informacion.
+
+### Fuente Calculo Valores Intervalos y Complejos:
+ - https://en.wikipedia.org/w/index.php?title=Electrocardiography&oldid=513556137#Waves_and_intervals
+### Fuente Calculo valor Ritmo Cardiaco: 
+ - https://www.ijrte.org/portfolio-item/d72941111422 
+### Fuente para Calculo Diagnostico de Patrones anormales complejos del ECG e hipótesis diagnósticas asociadas:
+ - Tipos bradicardia: https://www.shaio.org/bradicardia
+ - https://www.bem.fi/book/19/19.htm
+ - https://alivecor.com/press/press_release/fda-grants-first-ever-clearances-to-detect-bradycardia-and-tachycardia-on-a-personal-ecg-device
+ - Para PVC :
+     - https://www.bem.fi/book/19/19.htm : Prematuridad del QRS, QRS ancho y Ausencia de onda P previa (no hay onda P después de QRS en x ms)
+     - https://ecg.utah.edu/pdf
+     - https://link.springer.com/article/10.1007/s00521-021-05820-2 : Ausencia de Onda P previa
+     - https://journals.sagepub.com/doi/10.3233/THC-140818 : Prematuridad del QRS basandonos en RR-intervalo (datos exactos son estimaciones)
+     - (Hay que tener en cuenta que para las reglas de Prematuridad del QRS y Ausencia onda P no encontramos valores específicos, asi que nosotros decidimos derivarlos dependiendo del registro y los datos que tenemos.)
+ - Hipopotosemia: Sintomas hipocalcemia = Intervalo PR prolongado + Segmento ST alargado / prolongado (depresión): https://en.wikipedia.org/wiki/Hypokalemia#Electrocardiogram + https://ecg.utah.edu/pdf . En estos estudios es donde se establece que debemos buscar cambios o anomalias, es decir, un ciclo donde un intervalo PR prolonado o un Segmento ST alargado.
+     - Obtención de lo que se consideran valores Intervalo PR prolongado: https://ecgwaves.com/docs/reference-values-for-adult-ecg/
+     - Obtención de lo que se consideran valores Segmento ST alargado (depresión): https://cardiologiaarritmias.com/hipocalcemia-en-ecg
+ - Hipocalcemia: https://litfl.com/qt-interval-ecg-library/#:~:text=Represents%20time%20taken%20for%20ventricular,shortens%20at%20faster%20heart%20rates ; https://en.wikipedia.org/wiki/Hypocalcemia (Información sobre intervalos QT prolongados)
