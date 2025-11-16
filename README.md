@@ -22,3 +22,6 @@
  - Hipocalcemia: https://litfl.com/qt-interval-ecg-library/#:~:text=Represents%20time%20taken%20for%20ventricular,shortens%20at%20faster%20heart%20rates ; https://en.wikipedia.org/wiki/Hypocalcemia (InformaciÃ³n sobre intervalos QT prolongados)
  - IAM: https://www.emdocs.net/ecg-pointers-post-myocardial-infarction-complications-lv-aneurysm/ + https://litfl.com/omi-replacing-the-stemi-misnomer + https://internetbookofemergencymedicine.com/2025/06/04/april-2025-monthly-review/ + descripciÃ³n wikipedia: https://en.wikipedia.org/w/index.php?title=Electrocardiography&oldid=513556137#Some_pathological_patterns_which_can_be_seen_on_the_ECG
  - Isquemia Coronaria:
+ 
+ - Hipopotasemia: buscamos depresion segmento ST y de la onda T, si es leve puede ser plana la onda T.
+ https://www.msdmanuals.com/es/professional/trastornos-endocrinológicos-y-metabólicos/trastornos-electrolíticos/hipopotasemia#Diagnóstico_v8375503_es

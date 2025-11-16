@@ -25,6 +25,7 @@ import dominioECG.Bradicardia;
 import dominioECG.Taquicardia;
 import dominioECG.ContraccionVentricularPrematura;
 import dominioECG.Hipocalemia;
+import dominioECG.Hipopotasemia;
 import dominioECG.IAM;
 
 //declare any global variables here
@@ -419,58 +420,56 @@ rule "Detectar hipocalcemia"
     	System.out.println(descripcion);
 end
 
-/*rule "Detectar hipopotasemia"
-	when
-		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un Intervalo PR > 220 ms y si tenemos
-		//un segmento con depresion -> Con una profundidad de mas de > 0.1 y una duración de mas de 200ms.
-		//Para calcular la profundidad usaremos las ondas en si.
-		$r: RegistroECG();
-		
-		//Encontramos ondas P y S, de los Segmentos ST e Intervalos PR, que pertenezcan al registro y sean 
-		//del mismo ciclo.
-		$p : OndaP( registroPertenece == $r, 
-					cicloPertenece != null ,
-					$ciclo : cicloPertenece, 
-					$inicioP : start_time )
-		$s : OndaS(
-                cicloPertenece == $ciclo,
-                $finS : end_time,
-                $amplitudS : peak_amplitude 
-              )
-        
-        $t : OndaT(
-                cicloPertenece == $ciclo,
-                $amplitudT : peak_amplitude 
-              )
-        
-        //Vemos a ver si tenemos un intervaloPR mayor que 220 ms      
-        $intervaloPR : Intervalo(
-	        registroPertenece == $r,
-	        tipoIntervalo == TipoIntervalo.PR,
-	        tiempoInicio == $inicioP,
-	        duracion > 220
-   		)
-   		
-   		//Vemos a ver si hay un Segmento ST (nosotros lo tenemos como Intervalo) que sea prolongado
-   		$segmentoST : Intervalo(
-	        registroPertenece == $r,
-	        tipoIntervalo == TipoIntervalo.ST,
-	        tiempoInicio == $finS,
-	        // Aplicamos umbrales diferentes según el sexo
-	        duracion > 200
-	    )
-   		       
-	then
-		String nombreDiagnostico = new String("Hipopotasemia");
-	    
-	    Hipocalemia diagnosticoHipocalcemia = new Hipocalemia(descripcion, nombreDiagnostico);
-	    diagnosticoHipocalcemia.setRegistroAsociado($r);
-	    diagnosticoHipocalcemia.setnCicloAfectado($ciclo.getCycle_number());
-	    
-	    insert(diagnosticoHipocalcemia);
-		System.out.println(descripcion);
+rule "Detectar hipopotasemia"
+when
+    $r: RegistroECG();
+    
+    not( Hipopotasemia( registroECG == $r ) )
+
+    // Ondas del mismo ciclo
+    $p : OndaP(
+            registroPertenece == $r,
+            cicloPertenece != null,
+            $ciclo : cicloPertenece
+    )
+
+    $s : OndaS(
+            registroPertenece == $r,
+            cicloPertenece == $ciclo,
+            $amplitudS : peak_amplitude
+    )
+
+    $t : OndaT(
+            registroPertenece == $r,
+            cicloPertenece == $ciclo,
+            $amplitudT : peak_amplitude
+    )
+
+    //Alteración severa de la onda T: aplanada, pequeña o invertida
+    eval(
+        // T invertida o muy negativa
+        $amplitudT <= -0.5 ||
+
+        // T muy aplanada
+        $amplitudT < 0.15 ||
+
+        // T muy pequeña respecto a S (aplanamiento relativo)
+        Math.abs($amplitudT) < (Math.abs($amplitudS) * 0.3)
+    )
+
+then
+    String nombreDiagnostico = "Hipopotasemia";
+    String descripcion = "Cambios compatibles con hipopotasemia: onda T invertida o aplanada.";
+
+    Hipopotasemia diagnostico = new Hipopotasemia(descripcion, nombreDiagnostico);
+    diagnostico.setRegistroAsociado($r);
+    diagnostico.setnCicloAfectado($ciclo.getCycle_number());
+
+    insert(diagnostico);
+    System.out.println(descripcion);
 end
-*/
+
+
 
 rule "Detectar PVC"
 	when
