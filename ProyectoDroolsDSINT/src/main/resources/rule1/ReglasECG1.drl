@@ -26,6 +26,7 @@ import dominioECG.Taquicardia;
 import dominioECG.ContraccionVentricularPrematura;
 import dominioECG.Hipocalemia;
 import dominioECG.IAM;
+import dominioECG.Isquemia;
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -540,8 +541,50 @@ end
 
 rule "Detectar Isquemia Coronaria"
 	when
+	// Para detectar Isquemia Coronaria nos tenemos que fijar principalmente en el segmento ST y en la onda T, el resto del 
+	// electrocardiograma no nos da informacion util para detectarla. Detecta una Isquemia Coronaria la depresion del segmento ST y la
+	// inversion de la onda T.
 	
+	// En cuanto a la diferencia entre hombres y mujeres si que hay solo que no en el ECG.
+    	$r: RegistroECG()
+    
+    	// Evitar diagnóstico duplicado
+    	not( Isquemia( registroECG == $r ) )
+    
+    	$s : OndaS(
+        	registroPertenece == $r,
+        	cicloPertenece != null,
+        	$nciclo : cicloPertenece.cycle_number,
+        	$finS : end_time,
+        	$ampS : peak_amplitude
+    	)
+    
+    	$t : OndaT(
+        	registroPertenece == $r,
+        	cicloPertenece != null,
+        	cicloPertenece.cycle_number == $nciclo,
+        	$inicioT : start_time,
+        	$ampT : peak_amplitude
+    	)
+    
+    	// Criterios para isquemia: depresión ST o inversión de onda T
+    	eval( ($ampT - $ampS) <= -0.1 || $ampT < -0.1 )
+    
 	then
+    	String nombreDiagnostico = "Isquemia Coronaria";
+    	double diferenciaST = $ampT - $ampS;
+    
+    	String descripcion = "Detectado patrón sugestivo de Isquemia Coronaria en el registro: " + 
+                        	$r.getIdRegistro() + ". Ciclo: " + $nciclo + 
+                        	". Características: Depresión ST: " + String.format("%.3f", diferenciaST) + 
+                        	" mV, Amplitud T: " + String.format("%.3f", $ampT) + " mV.";
+    
+    	Isquemia isquemia = new Isquemia(descripcion, nombreDiagnostico);
+    	isquemia.setRegistroAsociado($r);
+    	isquemia.setnCicloAfectado($nciclo);
+    
+    	insert(isquemia);
+    	System.out.println(descripcion);
 end
 
 rule "Detectar Infarto Agudo de Miocardio." //Ampliar condiciones si se ve necesario.
