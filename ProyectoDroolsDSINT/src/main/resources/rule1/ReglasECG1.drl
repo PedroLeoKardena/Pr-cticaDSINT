@@ -25,7 +25,9 @@ import dominioECG.Bradicardia;
 import dominioECG.Taquicardia;
 import dominioECG.ContraccionVentricularPrematura;
 import dominioECG.Hipocalemia;
+import dominioECG.Hipopotasemia;
 import dominioECG.IAM;
+import dominioECG.Isquemia;
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -419,58 +421,47 @@ rule "Detectar hipocalcemia"
     	System.out.println(descripcion);
 end
 
-/*rule "Detectar hipopotasemia"
+rule "Detectar hipopotasemia"
 	when
-		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un Intervalo PR > 220 ms y si tenemos
-		//un segmento con depresion -> Con una profundidad de mas de > 0.1 y una duración de mas de 200ms.
-		//Para calcular la profundidad usaremos las ondas en si.
-		$r: RegistroECG();
-		
-		//Encontramos ondas P y S, de los Segmentos ST e Intervalos PR, que pertenezcan al registro y sean 
-		//del mismo ciclo.
-		$p : OndaP( registroPertenece == $r, 
-					cicloPertenece != null ,
-					$ciclo : cicloPertenece, 
-					$inicioP : start_time )
-		$s : OndaS(
-                cicloPertenece == $ciclo,
-                $finS : end_time,
-                $amplitudS : peak_amplitude 
-              )
-        
-        $t : OndaT(
-                cicloPertenece == $ciclo,
-                $amplitudT : peak_amplitude 
-              )
-        
-        //Vemos a ver si tenemos un intervaloPR mayor que 220 ms      
-        $intervaloPR : Intervalo(
-	        registroPertenece == $r,
-	        tipoIntervalo == TipoIntervalo.PR,
-	        tiempoInicio == $inicioP,
-	        duracion > 220
-   		)
-   		
-   		//Vemos a ver si hay un Segmento ST (nosotros lo tenemos como Intervalo) que sea prolongado
-   		$segmentoST : Intervalo(
-	        registroPertenece == $r,
-	        tipoIntervalo == TipoIntervalo.ST,
-	        tiempoInicio == $finS,
-	        // Aplicamos umbrales diferentes según el sexo
-	        duracion > 200
+	    $r: RegistroECG();
+	    
+	    not( Hipopotasemia( registroECG == $r ) )
+	
+	    // Ondas del mismo ciclo
+	    $p : OndaP(
+	            registroPertenece == $r,
+	            cicloPertenece != null,
+	            $ciclo : cicloPertenece
 	    )
-   		       
+	
+	    $t : OndaT(
+	            registroPertenece == $r,
+	            cicloPertenece == $ciclo,
+	            $amplitudT : peak_amplitude
+	    )
+	
+	    eval(
+	        // T muy negativa (hipopotasemia severa)
+	        $amplitudT <= -10
+			)
+			
 	then
-		String nombreDiagnostico = new String("Hipopotasemia");
-	    
-	    Hipocalemia diagnosticoHipocalcemia = new Hipocalemia(descripcion, nombreDiagnostico);
-	    diagnosticoHipocalcemia.setRegistroAsociado($r);
-	    diagnosticoHipocalcemia.setnCicloAfectado($ciclo.getCycle_number());
-	    
-	    insert(diagnosticoHipocalcemia);
-		System.out.println(descripcion);
+	    String nombreDiagnostico = "Hipopotasemia";
+	    String descripcion = "Detectado patrón sugestivo de Hipopotasemia severa en el registro: " +
+	                     $r.getIdRegistro() + ". Ciclo: " + $ciclo.getCycle_number() +
+	                     ". Características: Amplitud T extremadamente negativa: " +
+	                     String.format("%.3f", $amplitudT) + " mV.";
+	
+	
+	    Hipopotasemia diagnostico = new Hipopotasemia(descripcion, nombreDiagnostico);
+	    diagnostico.setRegistroAsociado($r);
+	    diagnostico.setnCicloAfectado($ciclo.getCycle_number());
+	
+	    insert(diagnostico);
+	    System.out.println(descripcion);
 end
-*/
+
+
 
 rule "Detectar PVC"
 	when
@@ -540,8 +531,54 @@ end
 
 rule "Detectar Isquemia Coronaria"
 	when
+	// Para detectar Isquemia Coronaria nos tenemos que fijar principalmente en el segmento ST y en la onda T, el resto del 
+	// electrocardiograma no nos da informacion util para detectarla. Detecta una Isquemia Coronaria la depresion del segmento ST y la
+	// inversion de la onda T.
 	
+	// En cuanto a la diferencia entre hombres y mujeres si que hay solo que no en el ECG.
+    	$r: RegistroECG()
+    
+    	// Evitar diagnóstico duplicado
+    	not( Isquemia( registroECG == $r ) )
+    
+    	$s : OndaS(
+        	registroPertenece == $r,
+        	cicloPertenece != null,
+        	$nciclo : cicloPertenece.cycle_number,
+        	$finS : end_time,
+        	$ampS : peak_amplitude
+    	)
+    
+    	$t : OndaT(
+        	registroPertenece == $r,
+        	cicloPertenece != null,
+        	cicloPertenece.cycle_number == $nciclo,
+        	$inicioT : start_time,
+        	$ampT : peak_amplitude
+    	)
+    
+    	// Criterios para isquemia: depresión ST o inversión de onda T
+    	eval(
+    	    $ampT > -10 &&               // Evita conflicto con hipopotasemia severa
+    	    ( ($ampT - $ampS) <= -0.1    
+    	      || $ampT < -0.1 )          
+    	)
+    
 	then
+    	String nombreDiagnostico = "Isquemia Coronaria";
+    	double diferenciaST = $ampT - $ampS;
+    
+    	String descripcion = "Detectado patrón sugestivo de Isquemia Coronaria en el registro: " + 
+                        	$r.getIdRegistro() + ". Ciclo: " + $nciclo + 
+                        	". Características: Depresión ST: " + String.format("%.3f", diferenciaST) + 
+                        	" mV, Amplitud T: " + String.format("%.3f", $ampT) + " mV.";
+    
+    	Isquemia isquemia = new Isquemia(descripcion, nombreDiagnostico);
+    	isquemia.setRegistroAsociado($r);
+    	isquemia.setnCicloAfectado($nciclo);
+    
+    	insert(isquemia);
+    	System.out.println(descripcion);
 end
 
 rule "Detectar Infarto Agudo de Miocardio." //Ampliar condiciones si se ve necesario.
