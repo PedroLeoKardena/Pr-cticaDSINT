@@ -422,52 +422,43 @@ rule "Detectar hipocalcemia"
 end
 
 rule "Detectar hipopotasemia"
-when
-    $r: RegistroECG();
-    
-    not( Hipopotasemia( registroECG == $r ) )
-
-    // Ondas del mismo ciclo
-    $p : OndaP(
-            registroPertenece == $r,
-            cicloPertenece != null,
-            $ciclo : cicloPertenece
-    )
-
-    $s : OndaS(
-            registroPertenece == $r,
-            cicloPertenece == $ciclo,
-            $amplitudS : peak_amplitude
-    )
-
-    $t : OndaT(
-            registroPertenece == $r,
-            cicloPertenece == $ciclo,
-            $amplitudT : peak_amplitude
-    )
-
-    //Alteración severa de la onda T: aplanada, pequeña o invertida
-    eval(
-        // T invertida o muy negativa
-        $amplitudT <= -0.5 ||
-
-        // T muy aplanada
-        $amplitudT < 0.15 ||
-
-        // T muy pequeña respecto a S (aplanamiento relativo)
-        Math.abs($amplitudT) < (Math.abs($amplitudS) * 0.3)
-    )
-
-then
-    String nombreDiagnostico = "Hipopotasemia";
-    String descripcion = "Cambios compatibles con hipopotasemia: onda T invertida o aplanada.";
-
-    Hipopotasemia diagnostico = new Hipopotasemia(descripcion, nombreDiagnostico);
-    diagnostico.setRegistroAsociado($r);
-    diagnostico.setnCicloAfectado($ciclo.getCycle_number());
-
-    insert(diagnostico);
-    System.out.println(descripcion);
+	when
+	    $r: RegistroECG();
+	    
+	    not( Hipopotasemia( registroECG == $r ) )
+	
+	    // Ondas del mismo ciclo
+	    $p : OndaP(
+	            registroPertenece == $r,
+	            cicloPertenece != null,
+	            $ciclo : cicloPertenece
+	    )
+	
+	    $t : OndaT(
+	            registroPertenece == $r,
+	            cicloPertenece == $ciclo,
+	            $amplitudT : peak_amplitude
+	    )
+	
+	    eval(
+	        // T muy negativa (hipopotasemia severa)
+	        $amplitudT <= -10
+			)
+			
+	then
+	    String nombreDiagnostico = "Hipopotasemia";
+	    String descripcion = "Detectado patrón sugestivo de Hipopotasemia severa en el registro: " +
+	                     $r.getIdRegistro() + ". Ciclo: " + $ciclo.getCycle_number() +
+	                     ". Características: Amplitud T extremadamente negativa: " +
+	                     String.format("%.3f", $amplitudT) + " mV.";
+	
+	
+	    Hipopotasemia diagnostico = new Hipopotasemia(descripcion, nombreDiagnostico);
+	    diagnostico.setRegistroAsociado($r);
+	    diagnostico.setnCicloAfectado($ciclo.getCycle_number());
+	
+	    insert(diagnostico);
+	    System.out.println(descripcion);
 end
 
 
@@ -567,7 +558,11 @@ rule "Detectar Isquemia Coronaria"
     	)
     
     	// Criterios para isquemia: depresión ST o inversión de onda T
-    	eval( ($ampT - $ampS) <= -0.1 || $ampT < -0.1 )
+    	eval(
+    	    $ampT > -10 &&               // Evita conflicto con hipopotasemia severa
+    	    ( ($ampT - $ampS) <= -0.1    
+    	      || $ampT < -0.1 )          
+    	)
     
 	then
     	String nombreDiagnostico = "Isquemia Coronaria";
