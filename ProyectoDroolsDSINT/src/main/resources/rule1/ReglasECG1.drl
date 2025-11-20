@@ -24,7 +24,7 @@ import dominioECG.Diagnostico;
 import dominioECG.Bradicardia;
 import dominioECG.Taquicardia;
 import dominioECG.ContraccionVentricularPrematura;
-import dominioECG.Hipocalemia;
+import dominioECG.Hipocalcemia;
 import dominioECG.Hipopotasemia;
 import dominioECG.IAM;
 import dominioECG.Isquemia;
@@ -415,7 +415,7 @@ rule "Detectar hipocalcemia"
 		//QT > 460 (en el caso de mujeres) o QT > 440 (en el caso de hombres).
 	    Persona( $sexo : sexo )
 	    $r: RegistroECG();
-		not( Hipocalemia( registroECG == $r ) )
+		not( Hipocalcemia( registroECG == $r ) )
 			    
 	    $q : OndaQ(
                 cicloPertenece != null,
@@ -445,7 +445,7 @@ rule "Detectar hipocalcemia"
 	        "lo que aumenta el riesgo de arritmias ventriculares. Se recomienda confirmar con niveles sericos de calcio ionizado."
 	    );
 	    
-	    Hipocalemia diagnosticoHipocalcemia = new Hipocalemia(descripcion, nombreDiagnostico);
+	    Hipocalcemia diagnosticoHipocalcemia = new Hipocalcemia(descripcion, nombreDiagnostico);
 	    diagnosticoHipocalcemia.setRegistroAsociado($r);
 	    diagnosticoHipocalcemia.setnCicloAfectado($nciclo);
 	    insert(diagnosticoHipocalcemia);

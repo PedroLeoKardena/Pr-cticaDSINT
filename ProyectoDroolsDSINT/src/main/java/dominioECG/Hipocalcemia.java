@@ -1,9 +1,9 @@
 package dominioECG;
 
-public class Hipocalemia extends Diagnostico{
+public class Hipocalcemia extends Diagnostico{
 
 	private int nCicloAfectado;
-	public Hipocalemia(String descripcion, String nombreDiagnostico) {
+	public Hipocalcemia(String descripcion, String nombreDiagnostico) {
 		super(descripcion, nombreDiagnostico);
 	}
 	public int getnCicloAfectado() {
