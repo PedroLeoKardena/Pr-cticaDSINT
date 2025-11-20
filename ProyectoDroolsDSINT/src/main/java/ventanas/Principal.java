@@ -79,10 +79,27 @@ public class Principal {
 			            JOptionPane.WARNING_MESSAGE
 			        );
 
-			        if (opcion == JOptionPane.YES_OPTION) {
+			        if (opcion == JOptionPane.YES_OPTION && !Controlador.INSTANCE.establecidoDirectorioSalida()) {
+			        	new VentanaDirectorios();
 			        	Controlador.INSTANCE.crearSesion();
 			        	cerrar();
+			        }else if(opcion == JOptionPane.YES_OPTION){
+			        	int sobreescribirOpcion = JOptionPane.showConfirmDialog(
+			        	        null, // Componente padre: null para centrar en pantalla
+			        	        "Ya existe un directorio de salida establecido.\n¿Desea seleccionar uno nuevo y sobreescribir la configuración actual?",
+			        	        "Confirmación de Sobrescritura",
+			        	        JOptionPane.YES_NO_OPTION, // Tipo de botones
+			        	        JOptionPane.WARNING_MESSAGE // Tipo de icono (advertencia)
+			        	    );
+			        	if (sobreescribirOpcion == JOptionPane.YES_OPTION) {
+			                new VentanaDirectorios(); 
+			            } else {
+			                System.out.println("Sobrescritura cancelada. Se mantiene el directorio de salida anterior.");
+			            }
+		                Controlador.INSTANCE.crearSesion();
+			        	cerrar();
 			        }
+			        
 				
 			}
 			
