@@ -28,6 +28,7 @@ import dominioECG.Hipocalemia;
 import dominioECG.Hipopotasemia;
 import dominioECG.IAM;
 import dominioECG.Isquemia;
+import dominioECG.Saludable;
 
 //declare any global variables here
 global java.util.concurrent.atomic.AtomicInteger cicloContador;
@@ -35,7 +36,8 @@ global java.util.concurrent.atomic.AtomicInteger cicloContador;
 
 
 rule "Print y Crear Registros Persona"
-	no-loop true
+		no-loop true
+		agenda-group "Reglas-Inicio"
     when
         $p: Persona();
     then
@@ -51,7 +53,13 @@ declare RegistroProcesado
     registroId : String
 end
 
+declare ReglasInicioProcesadas
+    registroId : String
+end
+
+
 rule "Insertar ondas"
+		agenda-group "Reglas-Inicio"
     when
         $r: RegistroECG();
         not RegistroProcesado( registroId == $r.getIdRegistro() )
@@ -61,33 +69,18 @@ rule "Insertar ondas"
 
 	    for (int i = 0; i < ondas.size() - 1; i++) {
 	        insert(ondas.get(i));
-	        //System.out.println(ondas.get(i).getCicloPertenece() == null);
 	    }
 		insert(new RegistroProcesado($r.getIdRegistro()));
 end
 
-//rule "Ver ondasQ"
-//		no-loop true
-//	when
-//		$ondaQ : dominioECG.OndaQ();
-//	then
-//		System.out.println("OndaQ con start_time: " + $ondaQ.getStart_time());
-//			
-//end
-
 rule "Crear ciclos"
 		no-loop true
+		agenda-group "Reglas-Inicio"
 	when
         // Capturamos un registro para usarlo en todos los filtros
         $registro : RegistroECG()
+		not ReglasInicioProcesadas( registroId == $registro.getIdRegistro() )
         
-        
-        //Contamos numero de ciclos:
-        //$numCiclos : Number() from accumulate (
-		//	Ciclo( registroPertenece == $registro ),
-		//	count( 1 )
-		//)
-	    
 		// Encontramos OndaP
         // Debe ser del registro, sin ciclo asociado. Guardamos el start time y el end time para hacer 
         //comprobaciones con ondaQ
@@ -133,7 +126,6 @@ rule "Crear ciclos"
               )     
          
 	then	
-		//System.out.println($numCiclos.intValue());	
 		int nCiclos = cicloContador.incrementAndGet();
         System.out.println(" Creando Ciclo " + nCiclos + " para el registro " + $registro.getIdRegistro() + ".");
         
@@ -164,8 +156,10 @@ end
 
 
 rule "Crear intervalos PP Persona" //Dos ciclos, en estos intervalos no calcularemos el incremento de amplitud, le daremos valor 0.
+    	agenda-group "Reglas-Inicio"
     when
     	$r: RegistroECG()
+		not ReglasInicioProcesadas( registroId == $r.getIdRegistro() )
     	$p1 : OndaP(
 	        registroPertenece == $r, // Comprueba que pertenece a $r
 	        cicloPertenece != null,
@@ -184,8 +178,10 @@ rule "Crear intervalos PP Persona" //Dos ciclos, en estos intervalos no calcular
 end
 
 rule "Crear intervalos RR Persona" //Dos ciclos, en estos intervalos no calcularemos el incremento de amplitud, le daremos valor 0.
+    	agenda-group "Reglas-Inicio"
     when
     	$r: RegistroECG()
+    	not ReglasInicioProcesadas( registroId == $r.getIdRegistro() )
     	$r1 : OndaP(
 	        registroPertenece == $r, // Comprueba que pertenece a $r
 	        cicloPertenece != null,
@@ -204,8 +200,10 @@ rule "Crear intervalos RR Persona" //Dos ciclos, en estos intervalos no calcular
 end
 
 rule "Crear intervalos PR Persona" //Dos ciclos
+    	agenda-group "Reglas-Inicio"
     when
     	$r: RegistroECG()
+    	not ReglasInicioProcesadas( registroId == $r.getIdRegistro() )
     	$p : OndaP(
             registroPertenece == $r, // Debe pertenecer a este $registro
             cicloPertenece != null,
@@ -225,8 +223,10 @@ end
 
 
 rule "Crear intervalos QT Persona" //Dos ciclos
+    	agenda-group "Reglas-Inicio"
     when
     	$r: RegistroECG()
+    	not ReglasInicioProcesadas( registroId == $r.getIdRegistro() )
     	$q : OndaQ(
                 registroPertenece == $r, // Debe pertenecer a este $registro
                 cicloPertenece != null,
@@ -246,8 +246,10 @@ end
 
 
 rule "Crear intervalos ST Persona (segmentos)"
+    	agenda-group "Reglas-Inicio"
     when
     	$r: RegistroECG()
+    	not ReglasInicioProcesadas( registroId == $r.getIdRegistro() )
     	$s : OndaS(
                 registroPertenece == $r, // Debe pertenecer a este $registro
                 cicloPertenece != null,
@@ -268,8 +270,10 @@ rule "Crear intervalos ST Persona (segmentos)"
 end
 
 rule "Crear intervalos TP Persona" //Dos ciclos
+    	agenda-group "Reglas-Inicio"
     when
     	$r: RegistroECG()
+    	not ReglasInicioProcesadas( registroId == $r.getIdRegistro() )
     	$t : OndaP(
                 registroPertenece == $r, // Debe pertenecer a este $registro
                 cicloPertenece != null,
@@ -288,8 +292,10 @@ rule "Crear intervalos TP Persona" //Dos ciclos
 end
 
 rule "Crear complejo QRS"
+		agenda-group "Reglas-Inicio"
 	when
 	    $r: RegistroECG()
+	    not ReglasInicioProcesadas( registroId == $r.getIdRegistro() )
     	$q : OndaQ(
             registroPertenece == $r, // Debe pertenecer a este $registro
             cicloPertenece != null,
@@ -326,17 +332,25 @@ rule "Crear Frecuencia Cardiaca"
 		$r: RegistroECG()
 		accumulate (Intervalo(tipoIntervalo == TipoIntervalo.RR, registroPertenece == $r, $dur : duracion),
 				    $promRR : average($dur)
-				)   
+				)
+		not( RitmoCardiaco( registroAsignado == $r ))   
 	then
-			double bpm = 60000/($promRR);
-			System.out.println("Ritmo cardiaco del registro: " + $r.getIdRegistro() + " = " + bpm);
-			RitmoCardiaco rc = new RitmoCardiaco(bpm, $r);
-			insert(rc);
+		double bpm = 60000/($promRR);
+		System.out.println("Ritmo cardiaco del registro: " + $r.getIdRegistro() + " = " + bpm);
+		RitmoCardiaco rc = new RitmoCardiaco(bpm, $r);
+		insert(rc);
+		modify($r){setFrecuenciaCardiaca(rc)};
+		//Todas las reglas con prioridad alta se han ejecutado, insertamos hecho de marca.
+		insert(new ReglasInicioProcesadas($r.getIdRegistro()));	
 end
 
 rule "Detectar Bradicardia Severa"
+		no-loop true
 	when
 		$r: RegistroECG();
+		//Comprobamos que no tenga Taquicardia por la restricción.
+		not( Taquicardia( registroECG == $r ) )
+		not( Bradicardia( registroECG == $r ) )
 		$rc: RitmoCardiaco(registroAsignado == $r,
 						   valor <= 40)
 	then
@@ -344,14 +358,20 @@ rule "Detectar Bradicardia Severa"
 		String descripcion = new String("Detectada bradicardia sinusal SEVERA con respecto al registro: " + $r.getIdRegistro() + " por un ritmo cardiaco cuya frecuencia es inferior a 40 latidos/minuto en reposo: " + $rc.getValor());
 		Bradicardia bradi = new Bradicardia(descripcion, nombreDiagnostico);
 		bradi.setRegistroAsociado($r);
+		bradi.setFrecuencia($rc);
 		insert(bradi);
-		System.out.println(descripcion);		
+		System.out.println(nombreDiagnostico);		
+		modify($r){addDiagnostico(bradi)};
 		
 end
 
 rule "Detectar Bradicardia no Severa"
+		no-loop true
 	when
 		$r: RegistroECG();
+		//Comprobamos que no tenga Taquicardia por la restricción.
+		not( Taquicardia( registroECG == $r ) )
+		not( Bradicardia( registroECG == $r ) )
 		$rc: RitmoCardiaco(registroAsignado == $r,
 						   valor > 40,
 						   valor < 60)
@@ -360,13 +380,20 @@ rule "Detectar Bradicardia no Severa"
 		String descripcion = new String("Detectada bradicardia sinusal con respecto al registro: " + $r.getIdRegistro() + " por un ritmo cardiaco cuya frecuencia es inferior a 60 latidos/minuto en reposo: " + $rc.getValor());
 		Bradicardia bradi = new Bradicardia(descripcion, nombreDiagnostico);
 		bradi.setRegistroAsociado($r);
+		bradi.setFrecuencia($rc);
 		insert(bradi);
-		System.out.println(descripcion);		
+		System.out.println(nombreDiagnostico);
+		modify($r){addDiagnostico(bradi)};
+				
 end
 
 rule "Detectar Taquicardia"
+		no-loop true
 	when
 		$r: RegistroECG();
+		not( Taquicardia( registroECG == $r ) )
+		//Comprobamos que no tenga Bradicardia por la restriccion.
+		not( Bradicardia( registroECG == $r ) )
 		$rc: RitmoCardiaco(registroAsignado == $r,
 						   valor > 100)
 	then
@@ -374,18 +401,22 @@ rule "Detectar Taquicardia"
 		String descripcion = new String("Detectada taquicardia sinusal con respecto al registro: " + $r.getIdRegistro() + " por un ritmo cardiaco cuya frecuencia es superior a los 100 latidos/minuto en reposo: " + $rc.getValor());
 		Taquicardia taqui = new Taquicardia(descripcion, nombreDiagnostico);
 		taqui.setRegistroAsociado($r);
+		taqui.setFrecuencia($rc);
 		insert(taqui);
-		System.out.println(descripcion);
+		System.out.println(nombreDiagnostico);
+		modify($r){addDiagnostico(taqui)};
 		
 end
 
 rule "Detectar hipocalcemia"
+		no-loop true
 	when
 		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un segmento prolongado:
 		//QT > 460 (en el caso de mujeres) o QT > 440 (en el caso de hombres).
 	    Persona( $sexo : sexo )
 	    $r: RegistroECG();
-	    
+		not( Hipocalemia( registroECG == $r ) )
+			    
 	    $q : OndaQ(
                 cicloPertenece != null,
                 $inicioQ : start_time,
@@ -405,11 +436,11 @@ rule "Detectar hipocalcemia"
 		String nombreDiagnostico = new String("Hipocalcemia");
 	    String descripcion = new String(
 	        "Detectado patrón sugestivo de Hipocalcemia en el registro: " + $r.getIdRegistro() + 
-	        ". Características: " +
+	        ".\nCaracterísticas: " +
 	        "- Intervalo QT prolongado (" + $intervaloQT.getDuracion() + " ms > " + 
 	          ($sexo == "F" ? "460" : "440") + " ms). " +
-	        "- Este patrón electrocardiográfico sugiere posible hipocalcemia. " +
-	        "- Ciclo afectado: " + $nciclo + ". " +
+	        "- Este patrón electrocardiográfico sugiere posible hipocalcemia.\n" +
+	        "- Ciclo afectado: " + $nciclo + ".\n" +
 	        "La hipocalcemia prolonga el intervalo QT principalmente por alargamiento del segmento ST, " +
 	        "lo que aumenta el riesgo de arritmias ventriculares. Se recomienda confirmar con niveles séricos de calcio ionizado."
 	    );
@@ -418,10 +449,12 @@ rule "Detectar hipocalcemia"
 	    diagnosticoHipocalcemia.setRegistroAsociado($r);
 	    diagnosticoHipocalcemia.setnCicloAfectado($nciclo);
 	    insert(diagnosticoHipocalcemia);
-    	System.out.println(descripcion);
+    	System.out.println(nombreDiagnostico);
+    	modify($r){addDiagnostico(diagnosticoHipocalcemia)};
 end
 
 rule "Detectar hipopotasemia"
+		no-loop true
 	when
 	    $r: RegistroECG();
 	    
@@ -448,7 +481,7 @@ rule "Detectar hipopotasemia"
 	then
 	    String nombreDiagnostico = "Hipopotasemia";
 	    String descripcion = "Detectado patrón sugestivo de Hipopotasemia severa en el registro: " +
-	                     $r.getIdRegistro() + ". Ciclo: " + $ciclo.getCycle_number() +
+	                     $r.getIdRegistro() + ".\nCiclo: " + $ciclo.getCycle_number() +
 	                     ". Características: Amplitud T extremadamente negativa: " +
 	                     String.format("%.3f", $amplitudT) + " mV.";
 	
@@ -458,15 +491,19 @@ rule "Detectar hipopotasemia"
 	    diagnostico.setnCicloAfectado($ciclo.getCycle_number());
 	
 	    insert(diagnostico);
-	    System.out.println(descripcion);
+	    System.out.println(nombreDiagnostico);
+	    modify($r){addDiagnostico(diagnostico)};
 end
 
 
 
 rule "Detectar PVC"
+		no-loop true
 	when
 		$r: RegistroECG()
 		
+		not( ContraccionVentricularPrematura( registroECG == $r ) )
+
 		accumulate (Intervalo(tipoIntervalo == TipoIntervalo.RR, registroPertenece == $r, $dur : duracion),
 				    $promRR : average($dur)
 				)
@@ -513,11 +550,11 @@ rule "Detectar PVC"
 		String nombreDiagnostico = new String("Contraccion Ventricular Prematura");
 		String descripcion = new String(
 		    "Detectada Contraccion Ventricular Prematura (PVC) en el registro: " + $r.getIdRegistro() + 
-		    ". Características: " +
-		    "- Intervalo RR anterior (" + $durRR + " ms) es prematuro (< 80% del promedio RR: " + $promRR + " ms). " +
-		    "- Complejo QRS ancho (" + $durQRS + " ms > 100 ms). " +
-		    "- Ausencia de onda P previa (separación OndaP-QRS: " + ($inicioQRS - $finP) + " ms > 20% del RR promedio). " +
-		    "* Ciclo afectado: " + $nciclo + ". " +
+		    ".\nCaracterísticas: " +
+		    "- Intervalo RR anterior (" + $durRR + " ms) es prematuro (< 80% del promedio RR: " + $promRR + " ms).\n" +
+		    "- Complejo QRS ancho (" + $durQRS + " ms > 100 ms).\n" +
+		    "- Ausencia de onda P previa (separación OndaP-QRS: " + ($inicioQRS - $finP) + " ms > 20% del RR promedio).\n" +
+		    "* Ciclo afectado: " + $nciclo + ".\n" +
 		    "Esto indica un latido de origen ventricular que interrumpe el ritmo cardiaco normal."
 		);
 		
@@ -526,10 +563,12 @@ rule "Detectar PVC"
 		cvp.setnCicloAfectado($nciclo);
 		
 		insert(cvp);
-		System.out.println(descripcion);
+		System.out.println(nombreDiagnostico);
+		modify($r){addDiagnostico(cvp)};
 end
 
 rule "Detectar Isquemia Coronaria"
+		no-loop true
 	when
 	// Para detectar Isquemia Coronaria nos tenemos que fijar principalmente en el segmento ST y en la onda T, el resto del 
 	// electrocardiograma no nos da informacion util para detectarla. Detecta una Isquemia Coronaria la depresion del segmento ST y la
@@ -569,7 +608,7 @@ rule "Detectar Isquemia Coronaria"
     	double diferenciaST = $ampT - $ampS;
     
     	String descripcion = "Detectado patrón sugestivo de Isquemia Coronaria en el registro: " + 
-                        	$r.getIdRegistro() + ". Ciclo: " + $nciclo + 
+                        	$r.getIdRegistro() + ".\nCiclo: " + $nciclo + 
                         	". Características: Depresión ST: " + String.format("%.3f", diferenciaST) + 
                         	" mV, Amplitud T: " + String.format("%.3f", $ampT) + " mV.";
     
@@ -578,10 +617,12 @@ rule "Detectar Isquemia Coronaria"
     	isquemia.setnCicloAfectado($nciclo);
     
     	insert(isquemia);
-    	System.out.println(descripcion);
+    	System.out.println(nombreDiagnostico);
+    	modify($r){addDiagnostico(isquemia)};
 end
 
-rule "Detectar Infarto Agudo de Miocardio." //Ampliar condiciones si se ve necesario.
+rule "Detectar Infarto Agudo de Miocardio." 
+		no-loop true
 	when
 		//Tenemos que detectar ondas T extremadamentes agudas. Para ello buscamos ondas T cuya amplitud absoluta en
 		//comparación con la amplitud absoluta total de las ondas del complejo QRS de ese mismo ciclo sea mayor de un
@@ -622,11 +663,11 @@ rule "Detectar Infarto Agudo de Miocardio." //Ampliar condiciones si se ve neces
 
 	    // Construimos la descripción
 	    String descripcion = new String("Detectado Infarto Agudo de Miocardio (IAM) en el registro: " + $r.getIdRegistro() +
-	                         ". Características: " +
-	                         "- Onda T hiperaguda en el ciclo " + $nciclo + " (amplitud: " + $amplitudT + " mV). " +
-	                         "- Complejo QRS del mismo ciclo con amplitud absoluta total: " + $sumAmplitudQRS + " mV. " +
-	                         "- Ratio T/QRS: " + String.format("%.2f", ($amplitudT / $sumAmplitudQRS)*100) + "% (>36%). " +
-	                         "- Umbral de amplitud de T: " + ($sexo.equals("F") ? "0.8 mV" : "1.0 mV") + ". " +
+	                         ".\nCaracterísticas: " +
+	                         "- Onda T hiperaguda en el ciclo " + $nciclo + " (amplitud: " + $amplitudT + " mV).\n" +
+	                         "- Complejo QRS del mismo ciclo con amplitud absoluta total: " + $sumAmplitudQRS + " mV.\n" +
+	                         "- Ratio T/QRS: " + String.format("%.2f", ($amplitudT / $sumAmplitudQRS)*100) + "% (>36%).\n" +
+	                         "- Umbral de amplitud de T: " + ($sexo.equals("F") ? "0.8 mV" : "1.0 mV") + ".\n" +
 	                         "Esto indica una onda T extremadamente aguda, sugestiva de IAM.");
 		// Creamos el objeto IAM y asociamos información
 	    IAM iam = new IAM(descripcion, nombreDiagnostico);
@@ -636,7 +677,36 @@ rule "Detectar Infarto Agudo de Miocardio." //Ampliar condiciones si se ve neces
     	iam.setAmplitudQRS($sumAmplitudQRS);
     	
     	insert(iam);
-		System.out.println(descripcion);
+		System.out.println(nombreDiagnostico);
+		modify($r){addDiagnostico(iam)};
 	                         
 end
+
+rule "Registro Sin Diagnostico"
+		no-loop true
+		salience -10
+	when
+		$r : RegistroECG()
+		//Vemos si el registro tiene diagnostico asignado, si no, decimos que es saludable.
+		not( Diagnostico( registroECG == $r ) ) 
+	then
+		String nombreDiagnostico = new String("Saludable");
+
+	    String descripcion = new String(
+	        "No se han detectado anomalías significativas en el registro: " + $r.getIdRegistro() + ".\n" +
+	        "Las ondas P, los complejos QRS y las ondas T presentan una morfología, amplitud y duración " +
+	        "compatibles con los parámetros fisiológicos esperados.\n" +
+	        "No se han observado arritmias, alteraciones en la repolarización, elevaciones o depresiones del ST, " +
+	        "ni irregularidades en los intervalos RR que sugieran patología.\n" +
+	        "El trazado electrocardiográfico es homogéneo, estable y se interpreta como un registro saludable."
+	    );
+	
+	    Saludable diag = new Saludable(descripcion, nombreDiagnostico);
+	    diag.setRegistroAsociado($r);
+	    insert(diag);
+	    System.out.println(nombreDiagnostico);
+		modify($r){addDiagnostico(diag)};
+	
+end
+	
 

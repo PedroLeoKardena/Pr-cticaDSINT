@@ -4,15 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import utilsECG.ECGUtils;
-
 public class RegistroECG {
 	private List<Ciclo> ciclosRegistro = new ArrayList<Ciclo>();
 	private List<Onda> ondasRegistro = new ArrayList<Onda>();
 	private LocalDateTime fechaRegistro;
 	private List<Diagnostico> diagnosticos;
 	private String idRegistro;
-
+	private RitmoCardiaco frecuenciaCardiaca;
 	
 	public RegistroECG(List<Onda> ondas, String id) {
 		this.ondasRegistro = ondas;
@@ -39,10 +37,6 @@ public class RegistroECG {
 		return idRegistro;
 	}
 	
-	public double getHeartRate() {
-		return ECGUtils.getHeartRate(ciclosRegistro);
-	}
-	
 	public int getDuracion() {
 		if (ciclosRegistro == null || ciclosRegistro.isEmpty()) {
 		    return 0;
@@ -66,6 +60,14 @@ public class RegistroECG {
 	}
 	public List<Onda> getOndasRegistro() {
 		return ondasRegistro;
+	}
+
+	public RitmoCardiaco getFrecuenciaCardiaca() {
+		return frecuenciaCardiaca;
+	}
+
+	public void setFrecuenciaCardiaca(RitmoCardiaco frecuenciaCardiaca) {
+		this.frecuenciaCardiaca = frecuenciaCardiaca;
 	}
 	
 }
