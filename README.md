@@ -1,4 +1,4 @@
-# ProyectoDSINT 📊
+# ProyectoDSINT ðŸ“Š
 
 ## Fuentes para recopilar Informacion.
 
@@ -6,22 +6,22 @@
  - https://en.wikipedia.org/w/index.php?title=Electrocardiography&oldid=513556137#Waves_and_intervals
 ### Fuente Calculo valor Ritmo Cardiaco: 
  - https://www.ijrte.org/portfolio-item/d72941111422 
-### Fuente para Calculo Diagnostico de Patrones anormales complejos del ECG e hipótesis diagnósticas asociadas:
+### Fuente para Calculo Diagnostico de Patrones anormales complejos del ECG e hipÃ³tesis diagnÃ³sticas asociadas:
  - Tipos bradicardia: https://www.shaio.org/bradicardia
  - https://www.bem.fi/book/19/19.htm
  - https://alivecor.com/press/press_release/fda-grants-first-ever-clearances-to-detect-bradycardia-and-tachycardia-on-a-personal-ecg-device
  - Para PVC :
-     - https://www.bem.fi/book/19/19.htm : Prematuridad del QRS, QRS ancho y Ausencia de onda P previa (no hay onda P después de QRS en x ms)
+     - https://www.bem.fi/book/19/19.htm : Prematuridad del QRS, QRS ancho y Ausencia de onda P previa (no hay onda P despuÃ©s de QRS en x ms)
      - https://ecg.utah.edu/pdf
      - https://link.springer.com/article/10.1007/s00521-021-05820-2 : Ausencia de Onda P previa
      - https://journals.sagepub.com/doi/10.3233/THC-140818 : Prematuridad del QRS basandonos en RR-intervalo (datos exactos son estimaciones)
-     - (Hay que tener en cuenta que para las reglas de Prematuridad del QRS y Ausencia onda P no encontramos valores específicos, asi que nosotros decidimos derivarlos dependiendo del registro y los datos que tenemos.)
- - Hipopotosemia: Sintomas hipocalcemia = Intervalo PR prolongado + Segmento ST alargado / prolongado (depresión): https://en.wikipedia.org/wiki/Hypokalemia#Electrocardiogram + https://ecg.utah.edu/pdf . En estos estudios es donde se establece que debemos buscar cambios o anomalias, es decir, un ciclo donde un intervalo PR prolonado o un Segmento ST alargado.
-     - Obtención de lo que se consideran valores Intervalo PR prolongado: https://ecgwaves.com/docs/reference-values-for-adult-ecg/
-     - Obtención de lo que se consideran valores Segmento ST alargado (depresión): https://cardiologiaarritmias.com/hipocalcemia-en-ecg
- - Hipocalcemia: https://litfl.com/qt-interval-ecg-library/#:~:text=Represents%20time%20taken%20for%20ventricular,shortens%20at%20faster%20heart%20rates ; https://en.wikipedia.org/wiki/Hypocalcemia (Información sobre intervalos QT prolongados)
- - IAM: https://www.emdocs.net/ecg-pointers-post-myocardial-infarction-complications-lv-aneurysm/ + https://litfl.com/omi-replacing-the-stemi-misnomer + https://internetbookofemergencymedicine.com/2025/06/04/april-2025-monthly-review/ + descripción wikipedia: https://en.wikipedia.org/w/index.php?title=Electrocardiography&oldid=513556137#Some_pathological_patterns_which_can_be_seen_on_the_ECG
- - Isquemia Coronaria:
+     - (Hay que tener en cuenta que para las reglas de Prematuridad del QRS y Ausencia onda P no encontramos valores especÃ­ficos, asi que nosotros decidimos derivarlos dependiendo del registro y los datos que tenemos.)
+ - Hipopotosemia: Sintomas hipocalcemia = Intervaloâ€¯PR prolongado + Segmentoâ€¯ST alargado / prolongado (depresiÃ³n): https://en.wikipedia.org/wiki/Hypokalemia#Electrocardiogram + https://ecg.utah.edu/pdf . En estos estudios es donde se establece que debemos buscar cambios o anomalias, es decir, un ciclo donde un intervalo PR prolonado o un Segmento ST alargado.
+     - ObtenciÃ³n de lo que se consideran valores Intervalo PR prolongado: https://ecgwaves.com/docs/reference-values-for-adult-ecg/
+     - ObtenciÃ³n de lo que se consideran valores Segmento ST alargado (depresiÃ³n): https://cardiologiaarritmias.com/hipocalcemia-en-ecg
+ - Hipocalcemia: https://litfl.com/qt-interval-ecg-library/#:~:text=Represents%20time%20taken%20for%20ventricular,shortens%20at%20faster%20heart%20rates ; https://en.wikipedia.org/wiki/Hypocalcemia (InformaciÃ³n sobre intervalos QT prolongados)
+ - IAM: https://www.emdocs.net/ecg-pointers-post-myocardial-infarction-complications-lv-aneurysm/ + https://litfl.com/omi-replacing-the-stemi-misnomer + https://internetbookofemergencymedicine.com/2025/06/04/april-2025-monthly-review/ + descripciÃ³n wikipedia: https://en.wikipedia.org/w/index.php?title=Electrocardiography&oldid=513556137#Some_pathological_patterns_which_can_be_seen_on_the_ECG
+ - Isquemia Coronaria: https://litfl.com/myocardial-ischaemia-ecg-library/ ; https://www.bem.fi/book/19/19.htm ; https://ecg.utah.edu/pdf
  
  - Hipopotasemia: buscamos depresion segmento ST y de la onda T, si es leve puede ser plana la onda T.
- https://www.msdmanuals.com/es/professional/trastornos-endocrinol�gicos-y-metab�licos/trastornos-electrol�ticos/hipopotasemia#Diagn�stico_v8375503_es
+ https://www.msdmanuals.com/es/professional/trastornos-endocrinológicos-y-metabólicos/trastornos-electrolíticos/hipopotasemia#Diagnóstico_v8375503_es
