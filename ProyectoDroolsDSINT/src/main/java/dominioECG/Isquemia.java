@@ -3,7 +3,7 @@ package dominioECG;
 public class Isquemia extends Diagnostico{
 	
 	private int nCicloAfectado;
-	private double amplitudQRS;
+	private double amplitudST;
 	private double amplitudT;
 	
 	public Isquemia(String descripcion, String nombreDiagnostico) {
@@ -16,11 +16,11 @@ public class Isquemia extends Diagnostico{
 	public void setnCicloAfectado(int nCicloAfectado) {
 		this.nCicloAfectado = nCicloAfectado;
 	}
-	public double getAmplitudQRS() {
-		return amplitudQRS;
+	public double getAmplitudST() {
+		return amplitudST;
 	}
-	public void setAmplitudQRS(double amplitudQRS) {
-		this.amplitudQRS = amplitudQRS;
+	public void setAmplitudST(double amplitudST) {
+		this.amplitudST = amplitudST;
 	}
 	public double getAmplitudT() {
 		return amplitudT;

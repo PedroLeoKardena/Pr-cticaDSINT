@@ -615,7 +615,9 @@ rule "Detectar Isquemia Coronaria"
     	Isquemia isquemia = new Isquemia(descripcion, nombreDiagnostico);
     	isquemia.setRegistroAsociado($r);
     	isquemia.setnCicloAfectado($nciclo);
-    
+    	isquemia.setAmplitudT($ampT);
+    	isquemia.setAmplitudST(diferenciaST);
+    	
     	insert(isquemia);
     	System.out.println(nombreDiagnostico);
     	modify($r){addDiagnostico(isquemia)};
