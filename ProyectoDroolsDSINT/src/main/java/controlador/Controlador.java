@@ -159,13 +159,16 @@ public enum Controlador {
 	            writerGlobal.write("Frecuencia cardiaca obtenida: " + frecuencia + " bpm\n");
 	            writerGlobal.write("Numero de ciclos completos: " + numCiclos + "\n");
 	            writerGlobal.write("Duracion Registro: " + duracionRegistro + "\n");
+            	writerGlobal.write("\n");
 
 	            writerGlobal.write("Diagnosticos:\n");
 	            for (Diagnostico diag : registro.getDiagnostico()) {
+	            	writerGlobal.write("\n");
 	                writerGlobal.write(diag.getDescripcion() + "\n");
+	                writerGlobal.write("\n");
 	            }
-
 	            writerGlobal.write("\n--------------------------------------------\n\n");
+
 	        }
 	    } catch (IOException e) {
 	        e.printStackTrace();
