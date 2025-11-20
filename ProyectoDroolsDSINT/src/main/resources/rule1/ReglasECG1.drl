@@ -411,7 +411,7 @@ end
 rule "Detectar hipocalcemia"
 		no-loop true
 	when
-		//Esta regla solo se apliará si sucede lo siguiente: Si tenemos un segmento prolongado:
+		//Esta regla solo se apliara si sucede lo siguiente: Si tenemos un segmento prolongado:
 		//QT > 460 (en el caso de mujeres) o QT > 440 (en el caso de hombres).
 	    Persona( $sexo : sexo )
 	    $r: RegistroECG();
@@ -427,7 +427,7 @@ rule "Detectar hipocalcemia"
 	        registroPertenece == $r,
 	        tipoIntervalo == TipoIntervalo.QT,
 	        tiempoInicio == $inicioQ,
-	        // Aplicamos umbrales diferentes según el sexo
+	        // Aplicamos umbrales diferentes segun el sexo
 	        (($sexo == "F" && duracion > 460) || 
 	         ($sexo == "M" && duracion > 440))
 	    )
@@ -435,14 +435,14 @@ rule "Detectar hipocalcemia"
 	then
 		String nombreDiagnostico = new String("Hipocalcemia");
 	    String descripcion = new String(
-	        "Detectado patrón sugestivo de Hipocalcemia en el registro: " + $r.getIdRegistro() + 
-	        ".\nCaracterísticas: " +
+	        "Detectado patron sugestivo de Hipocalcemia en el registro: " + $r.getIdRegistro() + 
+	        ".\nCaracteristicas: " +
 	        "- Intervalo QT prolongado (" + $intervaloQT.getDuracion() + " ms > " + 
 	          ($sexo == "F" ? "460" : "440") + " ms). " +
-	        "- Este patrón electrocardiográfico sugiere posible hipocalcemia.\n" +
+	        "- Este patron electrocardiografico sugiere posible hipocalcemia.\n" +
 	        "- Ciclo afectado: " + $nciclo + ".\n" +
 	        "La hipocalcemia prolonga el intervalo QT principalmente por alargamiento del segmento ST, " +
-	        "lo que aumenta el riesgo de arritmias ventriculares. Se recomienda confirmar con niveles séricos de calcio ionizado."
+	        "lo que aumenta el riesgo de arritmias ventriculares. Se recomienda confirmar con niveles sericos de calcio ionizado."
 	    );
 	    
 	    Hipocalemia diagnosticoHipocalcemia = new Hipocalemia(descripcion, nombreDiagnostico);
@@ -480,7 +480,7 @@ rule "Detectar hipopotasemia"
 			
 	then
 	    String nombreDiagnostico = "Hipopotasemia";
-	    String descripcion = "Detectado patrón sugestivo de Hipopotasemia severa en el registro: " +
+	    String descripcion = "Detectado patron sugestivo de Hipopotasemia severa en el registro: " +
 	                     $r.getIdRegistro() + ".\nCiclo: " + $ciclo.getCycle_number() +
 	                     ". Características: Amplitud T extremadamente negativa: " +
 	                     String.format("%.3f", $amplitudT) + " mV.";
@@ -607,9 +607,9 @@ rule "Detectar Isquemia Coronaria"
     	String nombreDiagnostico = "Isquemia Coronaria";
     	double diferenciaST = $ampT - $ampS;
     
-    	String descripcion = "Detectado patrón sugestivo de Isquemia Coronaria en el registro: " + 
+    	String descripcion = "Detectado patron sugestivo de Isquemia Coronaria en el registro: " + 
                         	$r.getIdRegistro() + ".\nCiclo: " + $nciclo + 
-                        	". Características: Depresión ST: " + String.format("%.3f", diferenciaST) + 
+                        	". Caracteristicas: Depresion ST: " + String.format("%.3f", diferenciaST) + 
                         	" mV, Amplitud T: " + String.format("%.3f", $ampT) + " mV.";
     
     	Isquemia isquemia = new Isquemia(descripcion, nombreDiagnostico);
@@ -663,7 +663,7 @@ rule "Detectar Infarto Agudo de Miocardio."
 
 	    // Construimos la descripción
 	    String descripcion = new String("Detectado Infarto Agudo de Miocardio (IAM) en el registro: " + $r.getIdRegistro() +
-	                         ".\nCaracterísticas: " +
+	                         ".\nCaracteristicas: " +
 	                         "- Onda T hiperaguda en el ciclo " + $nciclo + " (amplitud: " + $amplitudT + " mV).\n" +
 	                         "- Complejo QRS del mismo ciclo con amplitud absoluta total: " + $sumAmplitudQRS + " mV.\n" +
 	                         "- Ratio T/QRS: " + String.format("%.2f", ($amplitudT / $sumAmplitudQRS)*100) + "% (>36%).\n" +
@@ -693,12 +693,12 @@ rule "Registro Sin Diagnostico"
 		String nombreDiagnostico = new String("Saludable");
 
 	    String descripcion = new String(
-	        "No se han detectado anomalías significativas en el registro: " + $r.getIdRegistro() + ".\n" +
-	        "Las ondas P, los complejos QRS y las ondas T presentan una morfología, amplitud y duración " +
-	        "compatibles con los parámetros fisiológicos esperados.\n" +
+	        "No se han detectado anomalias significativas en el registro: " + $r.getIdRegistro() + ".\n" +
+	        "Las ondas P, los complejos QRS y las ondas T presentan una morfologia, amplitud y duración " +
+	        "compatibles con los parámetros fisiologicos esperados.\n" +
 	        "No se han observado arritmias, alteraciones en la repolarización, elevaciones o depresiones del ST, " +
 	        "ni irregularidades en los intervalos RR que sugieran patología.\n" +
-	        "El trazado electrocardiográfico es homogéneo, estable y se interpreta como un registro saludable."
+	        "El trazado electrocardiográfico es homogeneo, estable y se interpreta como un registro saludable."
 	    );
 	
 	    Saludable diag = new Saludable(descripcion, nombreDiagnostico);

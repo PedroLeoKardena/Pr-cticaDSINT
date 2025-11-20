@@ -134,11 +134,11 @@ public enum Controlador {
 		File ficheroGlobal = new File(directorioSalida, "todo.salida_" + timestamp + ".txt");
 		List<RegistroECG> registros = this.personaIniciada.getRegistroECG();
 		
-		String infoComun = new String("Cálculo de la frecuencia cardíaca:\n"
-				+ "	            Hemos calculado el ritmo cardíaco mediante el promedio de la duración de los intervalos RR.\n"
-				+ "	            Esta metodología está basada en la referencia: https://www.ijrte.org/portfolio-item/d72941111422\n"
+		String infoComun = new String("Calculo de la frecuencia cardiaca:\n"
+				+ "	            Hemos calculado el ritmo cardíaco mediante el promedio de la duracion de los intervalos RR.\n"
+				+ "	            Esta metodologia esta basada en la referencia: https://www.ijrte.org/portfolio-item/d72941111422\n"
 				+ "\n"
-				+ "	            Sobre los ciclos cardíacos:\n"
+				+ "	            Sobre los ciclos cardiacos:\n"
 				+ "	            Solo se consideran los ciclos completos, es decir, aquellos que contienen todas las ondas PQRST.\n"
 				+ "	            Los ciclos incompletos no se tienen en cuenta.");
 		 // Escribimos el fichero global
@@ -156,11 +156,11 @@ public enum Controlador {
 	            int duracionRegistro = registro.getDuracion();
 
 	            writerGlobal.write("Registro: " + id + " (fichero original: " + nombreFichero + ")\n");
-	            writerGlobal.write("Frecuencia cardíaca obtenida: " + frecuencia + " bpm\n");
-	            writerGlobal.write("Número de ciclos completos: " + numCiclos + "\n");
-	            writerGlobal.write("Duración Registro: " + duracionRegistro + "\n");
+	            writerGlobal.write("Frecuencia cardiaca obtenida: " + frecuencia + " bpm\n");
+	            writerGlobal.write("Numero de ciclos completos: " + numCiclos + "\n");
+	            writerGlobal.write("Duracion Registro: " + duracionRegistro + "\n");
 
-	            writerGlobal.write("Diagnósticos:\n");
+	            writerGlobal.write("Diagnosticos:\n");
 	            for (Diagnostico diag : registro.getDiagnostico()) {
 	                writerGlobal.write(diag.getDescripcion() + "\n");
 	            }
@@ -188,17 +188,17 @@ public enum Controlador {
 	        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ficheroSalidaRegistro))) {
 
 	            // Parte específica para cada registro
-	            writer.write("Cálculo de la frecuencia cardiaca:\n");
-	            writer.write("La frecuencia cardíaca se obtiene calculando el promedio de la duración de los intervalos RR, ");
-	            writer.write("siguiendo la metodología descrita en la referencia: https://www.ijrte.org/portfolio-item/d72941111422.\n");
-	            writer.write("Frecuencia cardíaca obtenida: " + frecuencia + " bpm\n\n");
+	            writer.write("Calculo de la frecuencia cardiaca:\n");
+	            writer.write("La frecuencia cardiaca se obtiene calculando el promedio de la duracion de los intervalos RR, ");
+	            writer.write("siguiendo la metodologia descrita en la referencia: https://www.ijrte.org/portfolio-item/d72941111422.\n");
+	            writer.write("Frecuencia cardiaca obtenida: " + frecuencia + " bpm\n\n");
 
-	            writer.write("Ciclos cardíacos:\n");
+	            writer.write("Ciclos cardiacos:\n");
 	            writer.write("Solo se consideran los ciclos completos que contienen todas las ondas PQRST. ");
 	            writer.write("Los ciclos incompletos no se tienen en cuenta.\n");
-	            writer.write("Número de ciclos completos: " + numCiclos + "\n\n");
+	            writer.write("Numero de ciclos completos: " + numCiclos + "\n\n");
 
-	            writer.write("Diagnósticos detectados:\n");
+	            writer.write("Diagnosticos detectados:\n");
 	            for (Diagnostico diag : registro.getDiagnostico()) {
 	                writer.write(" - " + diag.getDescripcion() + "\n");
 	            }
