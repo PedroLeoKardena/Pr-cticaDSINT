@@ -1,7 +1,5 @@
 package dominioECG;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class Ciclo {
 
@@ -13,18 +11,12 @@ public class Ciclo {
 	private OndaT waveT;
 	private RegistroECG registroPertenece;
 	
-	//Un ciclo tiene varios complejos e intervalos.
-	private List<Complejo> complejos;
-	private List<Intervalo> intervalos;
-	
 	public Ciclo() {
 		this.waveP = null;
 		this.waveQ = null;
 		this.waveR = null;
 		this.waveS = null;
 		this.waveT = null;
-		complejos = new ArrayList<Complejo>();
-		intervalos = new ArrayList<Intervalo>();
 	}
 	
 	public void setCycle_number(int cycle_number) {
@@ -75,22 +67,6 @@ public class Ciclo {
 		return waveT;
 	}
 	
-	public List<Complejo> getComplejos(){
-		return new ArrayList<>(complejos);
-	}
-	
-	public List<Intervalo> getIntervalos(){
-		return new ArrayList<>(intervalos);
-	}
-	
-	public void addComplejo(Complejo comp) {
-		complejos.add(comp);
-	}
-	
-	public void addIntervalo(Intervalo inter) {
-		intervalos.add(inter);
-	}
-	
 	public int getTiempoInicio() {
 		return this.waveP.getStart_time();
 	}
@@ -102,8 +78,7 @@ public class Ciclo {
 	@Override
 	public String toString() {
 		return "Ciclo [cycle_number=" + cycle_number + ", waveP=" + waveP + ", waveQ=" + waveQ + ", waveR=" + waveR
-				+ ", waveS=" + waveS + ", waveT=" + waveT + ", complejos=" + complejos + ", intervalos=" + intervalos
-				+ "]";
+				+ ", waveS=" + waveS + ", waveT=" + waveT + "]";
 	}
 
 	public RegistroECG getRegistroPertenece() {
